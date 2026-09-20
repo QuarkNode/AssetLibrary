@@ -24,7 +24,7 @@ namespace PartManagementSystem.Data.Configurations
             {
                 MaterialId = 3,
                 MaterialName = "PETG (Plastic)",
-                Density = 1.274m
+                Density = 1.27m
             },
             new Material
             {

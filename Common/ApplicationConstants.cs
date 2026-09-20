@@ -23,7 +23,7 @@
         public const int EmailMaxLength = 100;
 
         public const int OccupationMinLength = 1;
-        public const int OccupationMaxLength = 50;
+        public const int OccupationMaxLength = 100;
 
         public const int CityMinLength = 1;
         public const int CityMaxLength = 50;

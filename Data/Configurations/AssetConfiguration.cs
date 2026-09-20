@@ -17,7 +17,7 @@ namespace PartManagementSystem.Data.Configurations
                 PartNumber = "PN-1001",
                 AssetName = "Drone Frame - Main Body",
                 Description = "Central chassis for quadcopter frame, mounts motors and battery tray",
-                MaterialId = 5,
+                MaterialId = 4,
                 Status = Status.Draft,
                 CurrentRevisionId = null,
                 OwnerId = 1,
