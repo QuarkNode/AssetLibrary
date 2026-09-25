@@ -1,6 +1,6 @@
 ﻿namespace PartManagementSystem.Common
 {
-    public class ApplicationConstants
+    public class EntityValidation
     {
         /* User Begin */
 
