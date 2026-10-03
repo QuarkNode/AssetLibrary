@@ -16,12 +16,6 @@
         public const int LastNameMinLength = 1;
         public const int LastNameMaxLength = 50;
 
-        public const int AgeMinLength = 1;
-        public const int AgeMaxLength = 120;
-
-        public const int EmailMinLength = 1;
-        public const int EmailMaxLength = 100;
-
         public const int OccupationMinLength = 1;
         public const int OccupationMaxLength = 100;
 
@@ -57,6 +51,9 @@
 
         public const int RevisionChangeNotesMaxLength = 200;
 
+        public const int OriginalFileNameMinLength = 1;
+        public const int OriginalFileNameMaxLength = 50;
+
 
         /* Revision End */
 
@@ -78,12 +75,5 @@
 
         /* Material End */
 
-
-        /* Tag Begin */
-
-        public const int TagNameMinLength = 1;
-        public const int TagNameMaxLength = 20;
-
-        /* Tag End */
     }
 }

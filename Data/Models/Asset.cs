@@ -4,7 +4,8 @@ namespace PartManagementSystem.Data.Models
     using PartManagementSystem.Data.Models.Enum;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using static Common.ApplicationConstants;
+
+    using static Common.EntityValidation;
     public class Asset
     {
         /* This represents one 3D part/file conceptually. Not any single version of it - look at Revision for this. It holds the identity and current state of the part. */
@@ -44,10 +45,6 @@ namespace PartManagementSystem.Data.Models
 
         [ForeignKey(nameof(OwnerId))]
         public User Owner { get; set; } = null!;
-        public int? CheckedOutByUserId { get; set; }
-
-        [ForeignKey(nameof(CheckedOutByUserId))]
-        public User? CheckedOutUser { get; set; }
 
         [Column(TypeName = "DATETIME2(3)")]
         public DateTime? CheckedOutOn { get; set; }

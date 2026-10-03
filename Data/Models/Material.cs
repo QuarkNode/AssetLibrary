@@ -2,8 +2,8 @@
 namespace PartManagementSystem.Data.Models
 {
     using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using static Common.ApplicationConstants;
+
+    using static Common.EntityValidation;
     public class Material
     {
         [Key]
@@ -12,9 +12,6 @@ namespace PartManagementSystem.Data.Models
         [Required]
         [StringLength(MaterialNameMaxLength, MinimumLength = MaterialNameMinLength)]
         public string MaterialName { get; set; } = null!;
-
-        [Column(TypeName = "DECIMAL(8,2)")]
-        public decimal? Density { get; set; }
 
     }
 }

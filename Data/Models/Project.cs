@@ -1,12 +1,10 @@
 ﻿
 namespace PartManagementSystem.Data.Models
 {
+    using PartManagementSystem.Data.Models.Enum;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-
-    using PartManagementSystem.Data.Models.Enum;
-
-    using static Common.ApplicationConstants;
+    using static Common.EntityValidation;
 
     public class Project
     {
@@ -14,6 +12,7 @@ namespace PartManagementSystem.Data.Models
         public int ProjectId { get; set; }
 
         [Required]
+        [StringLength(ProjectNameMaxLength, MinimumLength = ProjectNameMinLength)]
         public string ProjectName { get; set; } = null!;
 
         [Required]
@@ -28,10 +27,14 @@ namespace PartManagementSystem.Data.Models
         public DateTime? UpdatedOn { get; set; }
 
         [Required]
+        public bool IsDeleted { get; set; }
+
+        [Required]
         public Status Status { get; set; }
 
         [StringLength(ProjectDescriptionMaxLength)]
         public string? Description { get; set; }
 
+        public ICollection<Asset> Assets = new List<Asset>();
     }
 }

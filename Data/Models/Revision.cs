@@ -2,7 +2,8 @@
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using static Common.ApplicationConstants;
+
+    using static Common.EntityValidation;
     public class Revision
     {
         [Key]
@@ -22,6 +23,10 @@
 
         [Required]
         public long FileSizeBytes { get; set; }
+
+        [Required]
+        [StringLength(OriginalFileNameMaxLength, MinimumLength = OriginalFileNameMinLength)]
+        public string OriginalFileName { get; set; } = null!;
 
         [StringLength(RevisionChangeNotesMaxLength)]
         public string? ChangeNotes { get; set; }

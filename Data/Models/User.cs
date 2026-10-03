@@ -1,15 +1,16 @@
 ﻿
 namespace PartManagementSystem.Data.Models
 {
+    using Microsoft.AspNetCore.Identity;
     using PartManagementSystem.Data.Models.Enum;
+
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using static Common.ApplicationConstants;
-    public class User
+
+    using static Common.EntityValidation;
+    public class User : IdentityUser<int>
     {
         /* This represents a User in the Database */
-        [Key]
-        public int UserId { get; set; }
 
         [StringLength(CompanyNameMaxLength, MinimumLength = CompanyNameMinLength)]
         public string? CompanyName { get; set; }
@@ -26,14 +27,12 @@ namespace PartManagementSystem.Data.Models
         public string LastName { get; set; } = null!;
 
         [Required]
-        [Range(AgeMinLength, AgeMaxLength)]
-        public int Age { get; set; }
+        [Column(TypeName = "DATE")]
+        public DateTime DateOfBirth { get; set; }
+
         public Gender Gender { get; set; }
 
-        [Required]
-        [StringLength(EmailMaxLength, MinimumLength = EmailMinLength)]
-        public string Email { get; set; } = null!;
-
+        [StringLength(OccupationMaxLength, MinimumLength = OccupationMinLength)]
         public string? Occupation { get; set; }
 
         [Required]
@@ -44,7 +43,6 @@ namespace PartManagementSystem.Data.Models
         [StringLength(CountryMaxLength, MinimumLength = CountryMinLength)]
         public string Country { get; set; } = null!;
 
-        [Required]
         [Column(TypeName = "DATETIME2(3)")]
         public DateTime CreatedOn { get; set; }
 
