@@ -2,16 +2,20 @@
 namespace PartManagementSystem.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using PartManagementSystem.Services.Contracts;
+    using Microsoft.EntityFrameworkCore;
+
+    using PartManagementSystem.Data;
     using PartManagementSystem.ViewModels.Home;
+    using PartManagementSystem.ViewModels.Project;
+
     using System.Security.Claims;
 
     public class HomeController : Controller
     {
-        private readonly IProjectService projectService;
-        public HomeController(IProjectService projectService)
+        private readonly ApplicationDbContext dbContext;
+        public HomeController(ApplicationDbContext dbContext)
         {
-            this.projectService = projectService;
+            this.dbContext = dbContext;
         }
 
         [HttpGet]
@@ -25,7 +29,17 @@ namespace PartManagementSystem.Controllers
             {
                 viewModel.IsLoggedIn = true;
 
-                viewModel.Projects = (await projectService.GetUserProjectsAsync(userId.Value)).ToList();
+                viewModel.Projects = await dbContext.Projects
+                .AsNoTracking()
+                .Where(p => p.OwnerId == userId && !p.IsDeleted)
+                .OrderBy(p => p.ProjectName)
+                .Select(p => new ProjectCardViewModel
+                {
+                    ProjectId = p.ProjectId,
+                    ProjectName = p.ProjectName,
+                    AssetCount = p.Assets.Count(a => !a.IsDeleted)
+                })
+                .ToListAsync();
 
                 viewModel.ProjectCount = viewModel.Projects.Count;
             }
