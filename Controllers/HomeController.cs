@@ -1,25 +1,60 @@
-using Microsoft.AspNetCore.Mvc;
-using PartManagementSystem.Models;
-using System.Diagnostics;
 
 namespace PartManagementSystem.Controllers
 {
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+
+    using PartManagementSystem.Data;
+    using PartManagementSystem.ViewModels.Home;
+    using PartManagementSystem.ViewModels.Project;
+
+    using System.Security.Claims;
+
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly ApplicationDbContext dbContext;
+        public HomeController(ApplicationDbContext dbContext)
         {
-            return View();
+            this.dbContext = dbContext;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            int? userId = GetUserId();
+
+            var viewModel = new HomeViewModel();
+
+            if (userId.HasValue)
+            {
+                viewModel.IsLoggedIn = true;
+
+                viewModel.Projects = await dbContext.Projects
+                    .AsNoTracking()
+                    .Where(p => p.OwnerId == userId && !p.IsDeleted)
+                    .OrderBy(p => p.ProjectName)
+                    .Select(p => new ProjectCardViewModel
+                    {
+                        ProjectId = p.ProjectId,
+                        ProjectName = p.ProjectName,
+                        AssetCount = p.Assets.Count(a => !a.IsDeleted)
+                    })
+                    .ToListAsync();
+
+                viewModel.ProjectCount = viewModel.Projects.Count();
+            }
+
+            return View(viewModel);
         }
 
         public IActionResult Privacy()
         {
             return View();
         }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        private int GetUserId()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         }
     }
+
 }
