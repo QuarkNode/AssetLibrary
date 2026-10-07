@@ -19,9 +19,6 @@ namespace PartManagementSystem.Data.Models
         [StringLength(FirstNameMaxLength, MinimumLength = FirstNameMinLength)]
         public string FirstName { get; set; } = null!;
 
-        [StringLength(MiddleNameMaxLength, MinimumLength = MiddleNameMinLength)]
-        public string? MiddleName { get; set; }
-
         [Required]
         [StringLength(LastNameMaxLength, MinimumLength = LastNameMinLength)]
         public string LastName { get; set; } = null!;
@@ -31,9 +28,6 @@ namespace PartManagementSystem.Data.Models
         public DateTime DateOfBirth { get; set; }
 
         public Gender Gender { get; set; }
-
-        [StringLength(OccupationMaxLength, MinimumLength = OccupationMinLength)]
-        public string? Occupation { get; set; }
 
         [Required]
         [StringLength(CityMaxLength, MinimumLength = CityMinLength)]
