@@ -1,8 +1,64 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HomeViewModel
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/home-index.css" asp-append-version="true" />
+}
+
+<div class="home-wrap">
+    @if (!Model.IsLoggedIn)
+    {
+        @if (!Model.IsLoggedIn)
+        {
+            <section class="text-black rounded-3 p-5 text-center mt-4">
+                <h1 class="display-6 fw-bold">Your 3D parts, organized.</h1>
+                <p class="lead text-secondary mb-4">
+                    Upload STL, OBJ and FBX files, group them into projects, and keep every revision.
+                </p>
+                <a class="btn btn-primary btn-lg me-2" asp-controller="Account" asp-action="Login">Sign in</a>
+                <a class="btn btn-outline-dark btn-lg me-2" asp-controller="Account" asp-action="Register">Make an account</a>
+            </section>
+        }
+    }
+    else
+    {
+        <div class="home-header">
+            <p class="home-eyebrow">Library</p>
+            <h1 class="home-title">Your Projects</h1>
+            <span class="home-count">@Model.ProjectCount project@(Model.ProjectCount == 1 ? "" : "s")</span>
+        </div>
+
+        @if (Model.Projects != null && Model.Projects.Any())
+        {
+            <div class="row g-3">
+                @foreach (var project in Model.Projects)
+                {
+                    <div class="col-sm-6 col-lg-4">
+                        <a class="card project-card h-100 text-decoration-none text-reset"
+                           asp-controller="Project" asp-action="Details" asp-route-id="@project.ProjectId">
+                            <div class="project-thumb"></div>
+                            <div class="card-body">
+                                <h5 class="card-title mb-1">@project.ProjectName</h5>
+                                <span class="badge text-bg-secondary">
+                                    @project.AssetCount @(project.AssetCount == 1 ? "asset" : "assets")
+                                </span>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="home-empty">
+                <p>No projects yet.</p>
+                <a asp-controller="Project" asp-action="Upload" class="btn btn-sm btn-outline-primary mt-2">
+                    Upload your first asset
+                </a> to get started.
+            </div>
+        }
+    }
 </div>
