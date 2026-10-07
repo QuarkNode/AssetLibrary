@@ -2,46 +2,32 @@
 namespace PartManagementSystem.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-
-    using PartManagementSystem.Data;
+    using PartManagementSystem.Services.Contracts;
     using PartManagementSystem.ViewModels.Home;
-    using PartManagementSystem.ViewModels.Project;
-
     using System.Security.Claims;
 
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
-        public HomeController(ApplicationDbContext dbContext)
+        private readonly IProjectService projectService;
+        public HomeController(IProjectService projectService)
         {
-            this.dbContext = dbContext;
+            this.projectService = projectService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            int? userId = GetUserId();
-
             var viewModel = new HomeViewModel();
+
+            int? userId = GetUserId();
 
             if (userId.HasValue)
             {
                 viewModel.IsLoggedIn = true;
 
-                viewModel.Projects = await dbContext.Projects
-                    .AsNoTracking()
-                    .Where(p => p.OwnerId == userId && !p.IsDeleted)
-                    .OrderBy(p => p.ProjectName)
-                    .Select(p => new ProjectCardViewModel
-                    {
-                        ProjectId = p.ProjectId,
-                        ProjectName = p.ProjectName,
-                        AssetCount = p.Assets.Count(a => !a.IsDeleted)
-                    })
-                    .ToListAsync();
+                viewModel.Projects = (await projectService.GetUserProjectsAsync(userId.Value)).ToList();
 
-                viewModel.ProjectCount = viewModel.Projects.Count();
+                viewModel.ProjectCount = viewModel.Projects.Count;
             }
 
             return View(viewModel);
@@ -51,9 +37,9 @@ namespace PartManagementSystem.Controllers
         {
             return View();
         }
-        private int GetUserId()
+        private int? GetUserId()
         {
-            return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) ? userId : null;
         }
     }
 
