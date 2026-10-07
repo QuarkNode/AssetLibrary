@@ -11,7 +11,7 @@ namespace PartManagementSystem.Services
 
         public string? GetPhysicalPath(string relativePath)
         {
-            string fullPath = Path.GetFullPath(Path.Combine())
+            throw new NotImplementedException();
         }
 
         public Task<string> SaveAsync(IFormFile file, string subFolder)
