@@ -7,11 +7,11 @@ using PartManagementSystem.Data.Models;
 
 namespace PartManagementSystem.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class AssetLibraryDbContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         /* This is where we can configure our DB */
         /* Add Entities, FLUENT API, and more ...*/
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContextOptions) : base(dbContextOptions)
+        public AssetLibraryDbContext(DbContextOptions<AssetLibraryDbContext> dbContextOptions) : base(dbContextOptions)
         {
 
         }
@@ -74,7 +74,7 @@ namespace PartManagementSystem.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
 
-            //modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(AssetLibraryDbContext).Assembly);
         }
     }
 }
