@@ -1,4 +1,6 @@
-﻿using PartManagementSystem.ViewModels.Project;
+﻿using PartManagementSystem.Data.Models;
+using PartManagementSystem.ViewModels.Asset;
+using PartManagementSystem.ViewModels.Project;
 
 namespace PartManagementSystem.Services.Contracts
 {
@@ -6,13 +8,24 @@ namespace PartManagementSystem.Services.Contracts
 
     public interface IProjectService
     {
-        // Home page cards for the logged-in user
+        // Methods the controller currently uses
+        Task<Project?> GetDetailsAsync(int projectId);
+
+        Task<AssetUploadViewModel> GetAssetUploadViewModelAsync();
+
+        Task<AddAssetViewModel> AddNewAssetUploadViewModelAsync(int routeId, string projectName);
+
+        Task ProcessAssetUploadViewModelAsync(AddAssetViewModel model, int userId);
+
+        Task<int> ProcessAssetUploadViewModelAsync(AssetUploadViewModel viewModel, int userId);
+
+        Task<string?> GetProjectNameAsync(int routeProjectId, int userId);
+
+        // Existing stubs (not implemented yet)
         Task<IEnumerable<ProjectCardViewModel>> GetUserProjectsAsync(int userId);
 
-        // null = project doesn't exist or isn't owned by this user
         Task<ProjectDetailsViewModel> GetDetailsAsync(int projectId, int userId);
 
-        // Project name for the "Add asset" form header; null = not found or not owned
         Task<string?> GetNameAsync(int projectId, int userId);
     }
 }
