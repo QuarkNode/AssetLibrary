@@ -1,12 +1,18 @@
 ﻿
 namespace PartManagementSystem.Services
 {
+    using PartManagementSystem.Data;
     using PartManagementSystem.Services.Contracts;
     using PartManagementSystem.ViewModels.Asset;
     using PartManagementSystem.ViewModels.Revision;
 
     public class AssetService : IAssetService
     {
+        private readonly AssetLibraryDbContext dbContext;
+        public AssetService(AssetLibraryDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
         public Task<bool> AddRevisionAsync(AddRevisionViewModel model, int userId)
         {
             throw new NotImplementedException();
