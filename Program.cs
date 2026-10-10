@@ -3,10 +3,9 @@ namespace PartManagementSystem
 {
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+
     using PartManagementSystem.Data;
     using PartManagementSystem.Data.Models;
-    using PartManagementSystem.Services;
-    using PartManagementSystem.Services.Contracts;
 
     public class Program
     {
@@ -16,16 +15,15 @@ namespace PartManagementSystem
             string connectionString = GetConnectionString(builder);
 
             // Add services to the container.
+            builder.Services.AddApplicationServices();
+
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddDbContext<ApplicationDbContext>(opt =>
+            builder.Services.AddDbContext<AssetLibraryDbContext>(opt =>
             {
                 opt.UseSqlServer(connectionString);
             });
 
-            builder.Services.AddScoped<IFileStorageService, FileStorageService>();
-            builder.Services.AddScoped<IProjectService, ProjectService>();
-            builder.Services.AddScoped<IAssetService, AssetService>();
 
             builder.Services.AddIdentity<User, IdentityRole<int>>(opt =>
             {
@@ -35,7 +33,7 @@ namespace PartManagementSystem
                 opt.Password.RequireDigit = false;
                 opt.User.RequireUniqueEmail = true;
             }
-            ).AddEntityFrameworkStores<ApplicationDbContext>();
+            ).AddEntityFrameworkStores<AssetLibraryDbContext>();
 
             builder.Services.ConfigureApplicationCookie(opt =>
             {
@@ -51,7 +49,6 @@ namespace PartManagementSystem
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
-                app.UseDeveloperExceptionPage(); // test
             }
 
             app.UseHttpsRedirection();
@@ -65,7 +62,6 @@ namespace PartManagementSystem
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
-            app.MapRazorPages(); // test
 
             app.Run();
         }
