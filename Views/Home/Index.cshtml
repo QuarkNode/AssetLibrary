@@ -11,17 +11,14 @@
 <div class="home-wrap">
     @if (!Model.IsLoggedIn)
     {
-        @if (!Model.IsLoggedIn)
-        {
-            <section class="text-black rounded-3 p-5 text-center mt-4">
-                <h1 class="display-6 fw-bold">Your 3D parts, organized.</h1>
-                <p class="lead text-secondary mb-4">
-                    Upload STL, OBJ and FBX files, group them into projects, and keep every revision.
-                </p>
-                <a class="btn btn-primary btn-lg me-2" asp-controller="Account" asp-action="Login">Sign in</a>
-                <a class="btn btn-outline-dark btn-lg me-2" asp-controller="Account" asp-action="Register">Make an account</a>
-            </section>
-        }
+        <section class="text-black rounded-3 p-5 text-center mt-4">
+            <h1 class="display-6 fw-bold">Your 3D parts, organized.</h1>
+            <p class="lead text-secondary mb-4">
+                Upload STL, OBJ and FBX files, group them into projects, and keep every revision.
+            </p>
+            <a class="btn btn-primary btn-lg me-2" asp-controller="Account" asp-action="Login">Sign in</a>
+            <a class="btn btn-outline-dark btn-lg me-2" asp-controller="Account" asp-action="Register">Make an account</a>
+        </section>
     }
     else
     {
@@ -37,16 +34,62 @@
                 @foreach (var project in Model.Projects)
                 {
                     <div class="col-sm-6 col-lg-4">
-                        <a class="card project-card h-100 text-decoration-none text-reset"
-                           asp-controller="Project" asp-action="Details" asp-route-id="@project.ProjectId">
-                            <div class="project-thumb"></div>
+                        <!-- Custom classes from CSS file -->
+                        <div class="card project-card h-100 position-relative">
+
+                            <div class="project-thumb position-relative">
+                                <div class="thumb-media">
+                                    @if (!string.IsNullOrEmpty(project.ThumbnailUrl))
+                                    {
+                                        <img src="@project.ThumbnailUrl" alt="@project.ProjectName thumbnail" />
+                                    }
+                                    else
+                                    {
+                                        <img class="is-placeholder" src="~/images/project-placeholder.svg" alt="" />
+                                    }
+                                </div>
+
+                                <!-- Three dot Dropdown Menu -->
+                                <div class="dropdown position-absolute top-0 end-0 m-2" style="z-index: 2;" onclick="event.stopPropagation();">
+                                    <button class="btn btn-sm btn-light shadow-sm dropdown-toggle-btn"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                            title="Project Options">
+                                        &#8285;
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Project" asp-action="Edit" asp-route-id="@project.ProjectId">
+                                                Edit Project
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider my-1"></li>
+                                        <li>
+                                            <form asp-controller="Project" asp-action="Delete" asp-route-id="@project.ProjectId" method="post"
+                                                  onsubmit="return confirm('Are you sure you want to delete @project.ProjectName?');">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    Delete Project
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
                             <div class="card-body">
-                                <h5 class="card-title mb-1">@project.ProjectName</h5>
-                                <span class="badge text-bg-secondary">
+                                <h5 class="card-title mb-1 fw-bold">
+                                    <!-- Stretched-link leverages your card's custom CSS behavior while using proper ASP.NET Core routing -->
+                                    <a asp-controller="Project" asp-action="Details" asp-route-id="@project.ProjectId"
+                                       class="text-decoration-none text-dark stretched-link">
+                                        @project.ProjectName
+                                    </a>
+                                </h5>
+                                <span class="asset-count" style="z-index: 1;">
                                     @project.AssetCount @(project.AssetCount == 1 ? "asset" : "assets")
                                 </span>
                             </div>
-                        </a>
+                        </div>
                     </div>
                 }
             </div>

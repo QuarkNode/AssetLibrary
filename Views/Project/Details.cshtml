@@ -1,0 +1,60 @@
+﻿@model Project
+
+@{
+    ViewData["Title"] = Model.ProjectName;
+    var activeAssets = Model.Assets?.Where(a => !a.IsDeleted).ToList() ?? new List<Asset>();
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/project-details.css" />
+}
+
+<div class="pd-wrap">
+
+    <a class="ad-back" asp-controller="Home" asp-action="Index" asp-route-id="@Model.OwnerId">
+        &larr; Back to Projects
+    </a>
+
+    <div class="pd-header">
+        <p class="pd-eyebrow">Project</p>
+        <h1 class="pd-title">@Model.ProjectName</h1>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="pd-desc">@Model.Description</p>
+        }
+
+        <div class="pd-meta">
+            <span>Owner: <strong>@Model.Owner?.FirstName @Model.Owner?.LastName</strong></span>
+            <span>Created: <strong>@Model.CreatedOn.ToString("MMM d, yyyy")</strong></span>
+            <span>
+                Status:
+                <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="pd-toolbar">
+        <span class="pd-count">@activeAssets.Count asset@(activeAssets.Count == 1 ? "" : "s")</span>
+        <a class="pd-add-btn" asp-controller="Project" asp-action="Add" asp-route-id="@Model.ProjectId">
+            Add asset
+        </a>
+    </div>
+
+    @if (activeAssets.Any())
+    {
+        <div class="asset-grid">
+            @foreach (var asset in activeAssets)
+            {
+                <partial name="_AssetCard" model="asset" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="pd-empty">
+            No assets in this project yet.
+            <a asp-controller="Project" asp-action="Add" asp-route-projectId="@Model.ProjectId">Add the first one.</a>
+        </div>
+    }
+
+</div>

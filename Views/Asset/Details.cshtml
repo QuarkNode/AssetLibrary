@@ -1,0 +1,89 @@
+﻿@model Asset
+
+@{
+    ViewData["Title"] = Model.AssetName;
+    var orderedRevisions = Model.Revisions?.OrderByDescending(r => r.RevisionNumber).ToList();
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/asset-details.css" />
+}
+
+<div class="ad-wrap">
+    <!--- Back Navigation --->
+    <a class="ad-back" asp-controller="Project" asp-action="Details" asp-route-id="@Model.Project.ProjectId">
+        &larr; Back to @Model.Project.ProjectName
+    </a>
+
+    <div class="ad-header">
+        <p class="ad-eyebrow">@Model.PartNumber</p>
+        <h1 class="ad-title">@Model.AssetName</h1>
+        <!--- Model Description --->
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="ad-desc">@Model.Description</p>
+        }
+
+        <div class="ad-meta">
+            <span>
+                Status:
+                <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+            </span>
+            <span>Material: <strong>@(Model.Material?.MaterialName ?? "Not set")</strong></span>
+            <span>Owner: <strong>@Model.Owner?.FirstName @Model.Owner?.LastName</strong></span>
+            <span>Created: <strong>@Model.CreatedOn.ToString("MMM d, yyyy")</strong></span>
+            <a asp-controller="Asset" asp-action="AddRevision" asp-route-id="@Model.AssetId"
+               class="btn btn-primary">Upload new revision</a>
+        </div>
+
+    </div>
+    <!-- Revision Specification -->
+    <div class="ad-section">
+        <div class="ad-section-head">
+            <h2 class="ad-section-title">Revision history</h2>
+            @if (Model.CurrentRevision != null)
+            {
+                <span class="ad-current-tag">Current: Rev @Model.CurrentRevision.RevisionNumber</span>
+            }
+        </div>
+
+        @if (orderedRevisions.Any())
+        {
+            <table class="ad-revision-table">
+                <thead>
+                    <tr>
+                        <th>Rev</th>
+                        <th>Uploaded</th>
+                        <th>By</th>
+                        <th>Size</th>
+                        <th>Notes</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Revision Details -->
+                    @foreach (var rev in orderedRevisions)
+                    {
+                        <tr class="@(Model.CurrentRevisionId == rev.RevisionId ? "ad-row-current" : "")">
+                            <td class="ad-mono">@rev.RevisionNumber</td>
+                            <td class="ad-mono">@rev.UploadedOn.ToString("MMM d, yyyy h:mm tt")</td>
+                            <td>@rev.UploadedByUser?.FirstName @rev.UploadedByUser?.LastName</td>
+                            <td class="ad-mono">@((rev.FileSizeBytes / 1024.0).ToString("0.#")) KB</td>
+                            <td>@rev.ChangeNotes</td>
+                            <td>
+                                <a class="ad-download" asp-controller="Asset" asp-action="DownloadRevision" asp-route-id="@rev.RevisionId">
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="ad-empty">No revisions uploaded yet.</div>
+        }
+    </div>
+
+</div>

@@ -1,11 +1,10 @@
-
-namespace PartManagementSystem
+namespace AssetLibrary
 {
+    using AssetLibrary.Data;
+    using AssetLibrary.Data.Models;
+    using AssetLibrary.Extensions;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
-
-    using PartManagementSystem.Data;
-    using PartManagementSystem.Data.Models;
 
     public class Program
     {

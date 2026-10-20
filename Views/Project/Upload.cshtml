@@ -1,0 +1,131 @@
+﻿@model UploadAssetViewModel
+
+@{
+    ViewData["Title"] = "Upload Asset";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-primary text-white p-3 rounded-top-3">
+                    <h3 class="card-title mb-0 fs-4">
+                        <i class="bi bi-box-seam me-2"></i>Upload 3D Asset
+                    </h3>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-controller="Project" asp-action="Upload" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <!-- Basic Asset Information -->
+                        <div class="mb-4">
+                            <h5 class="text-secondary border-bottom pb-2 mb-3">Asset Details</h5>
+
+                            <div class="row g-3">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="PartNumber" class="form-label fw-bold"></label>
+                                    <input asp-for="PartNumber" class="form-control" placeholder="e.g. PN-1001" />
+                                    <span asp-validation-for="PartNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="AssetName" class="form-label fw-bold"></label>
+                                    <input asp-for="AssetName" class="form-control" placeholder="e.g. Motor Mount" />
+                                    <span asp-validation-for="AssetName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label fw-bold"></label>
+                                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Short description of the part"></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Project Selection Mode -->
+                        <div class="mb-4">
+                            <h5 class="text-secondary border-bottom pb-2 mb-3">Project Details</h5>
+
+                            <div class="mb-3">
+                                <label class="form-label d-block fw-bold">Project Selection</label>
+                                <div class="btn-group w-100" role="group" aria-label="Project selection mode">
+                                    <input type="radio" class="btn-check" name="IsNewProject" id="existingProjRadio" value="false" checked onclick="toggleProjectMode(false)" />
+                                    <label class="btn btn-outline-secondary" for="existingProjRadio">Use Existing Project</label>
+
+                                    <input type="radio" class="btn-check" name="IsNewProject" id="newProjRadio" value="true" onclick="toggleProjectMode(true)" />
+                                    <label class="btn btn-outline-secondary" for="newProjRadio">Create New Project</label>
+                                </div>
+                            </div>
+
+                            <!-- Existing Project Section -->
+                            <div id="existingProjectSection" class="p-3 bg-light rounded border">
+                                <label asp-for="ProjectId" class="form-label fw-bold"></label>
+                                <select asp-for="ProjectId" class="form-select" asp-items="Model.Projects">
+                                    <option value="">-- Select a project --</option>
+                                </select>
+                                <span asp-validation-for="ProjectId" class="text-danger small"></span>
+                            </div>
+
+                            <!-- New Project Section -->
+                            <div id="newProjectSection" class="p-3 bg-light rounded border" style="display:none;">
+                                <div class="mb-3">
+                                    <label asp-for="NewProjectName" class="form-label fw-bold"></label>
+                                    <input asp-for="NewProjectName" class="form-control" placeholder="e.g. Drone Concept Design" />
+                                    <span asp-validation-for="NewProjectName" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label asp-for="NewProjectDescription" class="form-label fw-bold"></label>
+                                    <textarea asp-for="NewProjectDescription" class="form-control" rows="2" placeholder="Brief project overview"></textarea>
+                                    <span asp-validation-for="NewProjectDescription" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Material and File Attachment -->
+                        <div class="mb-4">
+                            <h5 class="text-secondary border-bottom pb-2 mb-3">Specifications & File</h5>
+
+                            <div class="mb-3">
+                                <label asp-for="MaterialId" class="form-label fw-bold"></label>
+                                <select asp-for="MaterialId" class="form-select" asp-items="Model.Materials">
+                                    <option value="">-- None --</option>
+                                </select>
+                                <span asp-validation-for="MaterialId" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="File" class="form-label fw-bold">3D Model File</label>
+                                <input asp-for="File" type="file" class="form-control" accept=".obj,.stl,.fbx" />
+                                <div class="form-text">Accepted file formats: <code>.obj</code>, <code>.stl</code>, <code>.fbx</code></div>
+                                <span asp-validation-for="File" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-cloud-upload me-1"></i> Upload Asset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleProjectMode(isNew) {
+        document.getElementById('existingProjectSection').style.display = isNew ? 'none' : 'block';
+        document.getElementById('newProjectSection').style.display = isNew ? 'block' : 'none';
+    }
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
