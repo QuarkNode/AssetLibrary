@@ -1,20 +1,5 @@
 ﻿@model Asset
 
-@* 
-ORIGINAL PARTIAL VIEW:
-<a class="asset-card" asp-controller="Asset" asp-action="Details" asp-route-id="@Model.AssetId">
-    <div class="asset-card-top">
-        <span class="asset-part-no">@Model.PartNumber</span>
-        <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
-    </div>
-    <p class="asset-name">@Model.AssetName</p>
-    <span class="asset-material">@(Model.Material?.MaterialName ?? "No material set")</span>
-    <div class="asset-foot">
-        <span>Rev @(Model.CurrentRevision?.RevisionNumber.ToString() ?? "—")</span>
-    </div>
-</a>
-*@
-
 <div class="asset-card" onclick="if(!event.target.closest('.dropdown')) location.href='@Url.Action("Details", "Asset", new { id = Model.AssetId })';">
     <div class="asset-card-top">
         <span class="asset-part-no">@Model.PartNumber</span>
@@ -59,6 +44,6 @@ ORIGINAL PARTIAL VIEW:
     <span class="asset-material">@(Model.Material?.MaterialName ?? "No material set")</span>
 
     <div class="asset-foot">
-        <span>Rev @(Model.CurrentRevision?.RevisionNumber.ToString() ?? "—")</span>
+        <span>Revisions: @(Model.CurrentRevision?.RevisionNumber.ToString() ?? "—")</span>
     </div>
 </div>
