@@ -1,11 +1,9 @@
-﻿
-namespace PartManagementSystem.Controllers
+﻿namespace AssetLibrary.Controllers
 {
+    using AssetLibrary.Services.Contracts;
+    using AssetLibrary.Services.Models.Account;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-
-    using PartManagementSystem.Services.Contracts;
-    using PartManagementSystem.ViewModels.Account;
 
     public class AccountController : Controller
     {

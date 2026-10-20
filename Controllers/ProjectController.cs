@@ -1,11 +1,10 @@
-﻿
-namespace PartManagementSystem.Controllers
+﻿namespace AssetLibrary.Controllers
 {
+    using AssetLibrary.Services.Contracts;
+    using AssetLibrary.Services.Models.Asset;
+    using AssetLibrary.Services.Models.Project;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using PartManagementSystem.Services.Contracts;
-    using PartManagementSystem.ViewModels.Asset;
-
     using System.Security.Claims;
 
     [Authorize]
@@ -17,9 +16,96 @@ namespace PartManagementSystem.Controllers
             this.projectService = projectService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+
+            int? userId = GetUserId();
+
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var project = await projectService.GetDetailsAsync(id);
+
+            if (project == null)
+            {
+                return NotFound();
+            }
+
+            return View(project);
+        }
+
+        // Soft deletes a Project. Preserves the Project in DB for accidental deletion or unsure confirmations.
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id) // id = ProjectId
+        {
+            int? userId = GetUserId();
+
+            if (!userId.HasValue)
+            {
+                return Challenge();
+            }
+
+            bool deleted = await projectService.DeleteProjectAsync(id, userId.Value);
+
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        // URL: ~/Project/Edit/id
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id) // id = ProjectId
+        {
+            int? userId = GetUserId();
+
+            if (!userId.HasValue)
+            {
+                return Challenge();
+            }
+
+            var model = await projectService.GetEditFormAsync(id, userId.Value);
+
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(EditProjectViewModel model)
+        {
+            int? userId = GetUserId();
+
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            bool updated = await projectService.EditAsync(model, userId.Value);
+
+            if (!updated)
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction(nameof(Details), new { id = model.ProjectId });
+        }
+
         // URL: ~/Project/Upload
         // Returns a view of a list form where User can create/upload an Asset and Project.
-
         [HttpGet]
         public async Task<IActionResult> Upload()
         {
@@ -29,7 +115,7 @@ namespace PartManagementSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(AssetUploadViewModel viewModel)
+        public async Task<IActionResult> Upload(UploadAssetViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -51,7 +137,7 @@ namespace PartManagementSystem.Controllers
             }
             catch (Exception)
             {
-                ModelState.AddModelError(viewModel.ProjectId.ToString(), "An error occurred saving the asset");
+                ModelState.AddModelError(string.Empty, "An error occurred saving the asset");
 
                 return View(viewModel);
             }
@@ -114,7 +200,7 @@ namespace PartManagementSystem.Controllers
             }
             catch (Exception)
             {
-                ModelState.AddModelError(model.ProjectId.ToString(), "An error occurred while saving the asset. Please try again.");
+                ModelState.AddModelError(string.Empty, "An error occurred while saving the asset. Please try again.");
 
                 var reloadedViewModel = await projectService.AddNewAssetUploadViewModelAsync(model.ProjectId, projectName);
                 model.Materials = reloadedViewModel.Materials;
@@ -125,26 +211,6 @@ namespace PartManagementSystem.Controllers
 
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
-            var project = await projectService.GetDetailsAsync(id);
-
-            if (project == null)
-            {
-                return NotFound();
-            }
-
-            return View(project);
-        }
 
         // Methods
         private int? GetUserId()

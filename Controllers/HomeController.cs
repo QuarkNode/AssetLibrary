@@ -1,56 +1,32 @@
-
-namespace PartManagementSystem.Controllers
+namespace AssetLibrary.Controllers
 {
+    using AssetLibrary.Services.Contracts;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
-
-    using PartManagementSystem.Data;
-    using PartManagementSystem.ViewModels.Home;
-    using PartManagementSystem.ViewModels.Project;
 
     using System.Security.Claims;
 
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
-        public HomeController(ApplicationDbContext dbContext)
+        private readonly IHomeService homeService;
+        public HomeController(IHomeService homeService)
         {
-            this.dbContext = dbContext;
+            this.homeService = homeService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var viewModel = new HomeViewModel();
-
             int? userId = GetUserId();
-
-            if (userId.HasValue)
-            {
-                viewModel.IsLoggedIn = true;
-
-                viewModel.Projects = await dbContext.Projects
-                .AsNoTracking()
-                .Where(p => p.OwnerId == userId && !p.IsDeleted)
-                .OrderBy(p => p.ProjectName)
-                .Select(p => new ProjectCardViewModel
-                {
-                    ProjectId = p.ProjectId,
-                    ProjectName = p.ProjectName,
-                    AssetCount = p.Assets.Count(a => !a.IsDeleted)
-                })
-                .ToListAsync();
-
-                viewModel.ProjectCount = viewModel.Projects.Count;
-            }
+            var viewModel = await homeService.GetHomeViewModelAsync(userId);
 
             return View(viewModel);
         }
-
         public IActionResult Privacy()
         {
             return View();
         }
+
+        // Method
         private int? GetUserId()
         {
             return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) ? userId : null;
