@@ -1,0 +1,112 @@
+﻿@using AssetLibrary.Services.Models.Trash
+
+@model DeletedProjectDetailsViewModel // Adjust to your actual namespace/VM name
+
+@{
+    ViewData["Title"] = Model.ProjectName;
+    const int retentionDays = 30;
+}
+
+<div class="home-wrap">
+    <!-- Breadcrumb -->
+    <div class="mb-1 text-muted small font-monospace">
+        <a asp-controller="Projects" asp-action="Index" class="text-decoration-none text-muted">Library</a> /
+        <a asp-controller="Trash" asp-action="Index" class="text-decoration-none text-muted">Trash</a> /
+        Project Details
+    </div>
+
+    <!-- Trash Warning Callout -->
+    <div class="alert alert-warning py-2 px-3 small d-flex align-items-center mb-4" role="alert">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            This project is in Trash and will be permanently deleted after <strong>@retentionDays days</strong>.
+        </div>
+    </div>
+
+    <!-- Project Header Section -->
+    <div class="home-header align-items-end pb-3 border-bottom mb-4">
+        <div>
+            <span class="home-eyebrow">Deleted Project</span>
+            <h1 class="home-title">@Model.ProjectName</h1>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p class="text-secondary mt-2 mb-0">@Model.Description</p>
+            }
+        </div>
+
+        <!-- Action Buttons (Restore / Delete) -->
+        <div class="d-flex gap-2">
+            <form asp-controller="Projects" asp-action="Restore" asp-route-id="@Model.ProjectId" method="post">
+                <button type="submit" class="btn btn-dark">Restore Project</button>
+            </form>
+
+            <form asp-controller="Projects" asp-action="DeletePermanently" asp-route-id="@Model.ProjectId" method="post"
+                  onsubmit="return confirm('Permanently delete this project and all its assets? This cannot be undone.');">
+                <button type="submit" class="btn btn-outline-danger">Delete permanently</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Metadata Row -->
+    <div class="text-muted small font-monospace mb-5 d-flex gap-4 flex-wrap">
+        @if (!string.IsNullOrEmpty(Model.Owner))
+        {
+            <div>Owner: <span class="text-dark fw-semibold">@Model.Owner</span></div>
+        }
+        @if (Model.DeletedOn is not null)
+        {
+            <div>Deleted: <span class="text-dark fw-semibold">@Model.DeletedOn.Value.ToLocalTime().ToString("dd MMM yyyy")</span></div>
+        }
+        @if (!string.IsNullOrEmpty(Model.Status.ToString()))
+        {
+            <div>
+                Status: <span class="status-pill status-@Model.Status.ToString()">@Model.Status</span>
+            </div>
+        }
+    </div>
+
+    <!-- Assets Section Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="font-monospace text-muted fs-6 mb-0">
+            @Model.Assets.Count @(Model.Assets.Count == 1 ? "asset" : "assets") contained in this project
+        </h4>
+    </div>
+
+    <!-- Asset Cards Grid (Read-only view for Trash) -->
+    @if (Model.Assets != null && Model.Assets.Any())
+    {
+        <div class="row g-3">
+            @foreach (var asset in Model.Assets)
+            {
+                <div class="col-sm-6 col-lg-4">
+                    <div class="card project-card h-100 position-relative p-3 bg-light">
+                        <div class="card-body p-0">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0 fw-bold text-truncate" title="@asset.AssetName">
+                                    @asset.AssetName
+                                </h5>
+                                @if (!string.IsNullOrEmpty(asset.Status.ToString()))
+                                {
+                                    <span class="status-pill status-@asset.Status.ToString()">@asset.Status</span>
+                                }
+                            </div>
+                            <span class="asset-count">
+                                Revisions: @asset.RevisionCount
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="home-empty">
+            <p class="mb-0">No assets found in this project.</p>
+        </div>
+    }
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/home-index.css" asp-append-version="true" />
+}

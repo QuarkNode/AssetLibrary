@@ -12,6 +12,7 @@ namespace AssetLibrary.Extensions
             services.AddScoped<IAssetService, AssetService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IHomeService, HomeService>();
+            services.AddScoped<ITrashService, TrashService>();
 
             return services;
         }

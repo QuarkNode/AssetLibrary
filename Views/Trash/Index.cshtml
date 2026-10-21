@@ -1,0 +1,91 @@
+﻿@using AssetLibrary.Services.Models.Trash
+@model List<DeletedProjectViewModel>
+
+@{
+    ViewData["Title"] = "Deleted Projects";
+    const int retentionDays = 30; // keep in sync with your purge job
+    var projects = Model ?? new List<DeletedProjectViewModel>();
+}
+
+<div class="home-wrap">
+    <div class="home-header">
+        <div>
+            <div class="home-eyebrow">
+                <a asp-controller="Projects" asp-action="Index" class="text-decoration-none text-muted">Library</a> / Trash
+            </div>
+            <h1 class="home-title">Trash</h1>
+        </div>
+        <span class="home-count">
+            @projects.Count @(projects.Count == 1 ? "project" : "projects")
+        </span>
+    </div>
+
+    @if (projects.Count == 0)
+    {
+        <div class="home-empty">
+            <p class="fs-5 mb-2">Trash is empty</p>
+            <p class="mb-4">Deleted projects will show up here for @retentionDays days before being removed permanently.</p>
+            <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-dark">Back to Library</a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted mb-4">
+            Projects in Trash are permanently deleted after @retentionDays days.
+        </p>
+
+        <div class="row g-3">
+            @foreach (var project in projects)
+            {
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="project-card h-100">
+                        <div class="project-thumb">
+                            <div class="thumb-media">
+                                @if (!string.IsNullOrEmpty(project.ThumbnailUrl))
+                                {
+                                    <img src="@project.ThumbnailUrl" alt="@project.ProjectName" style="opacity: .6;" />
+                                }
+                                else
+                                {
+                                    <svg class="is-placeholder" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                         stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M12 2 3 7v10l9 5 9-5V7l-9-5Z" />
+                                        <path d="M3 7l9 5 9-5M12 12v10" />
+                                    </svg>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-body p-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <h5 class="card-title text-truncate mb-2">
+                                    <a asp-controller="Trash" asp-action="Details" asp-route-id="@project.ProjectId" class="text-decoration-none text-dark stretched-link">
+                                        @project.ProjectName
+                                    </a>
+                                </h5>
+                                <span class="asset-count">
+                                    @project.AssetCount @(project.AssetCount == 1 ? "asset" : "assets")
+                                </span>
+                            </div>
+
+                            <div class="card-footer bg-transparent border-0 p-0 pt-3 mt-3 d-flex gap-2" style="position: relative; z-index: 2;">
+                                <form asp-controller="Projects" asp-action="Restore" asp-route-id="@project.ProjectId" method="post">
+                                    <button type="submit" class="btn btn-sm btn-dark">Restore</button>
+                                </form>
+
+                                <form asp-controller="Projects" asp-action="DeletePermanently" asp-route-id="@project.ProjectId" method="post"
+                                      onsubmit="return confirm('Permanently delete this project and all its assets? This cannot be undone.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete permanently</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/trash.css" asp-append-version="true" />
+}
