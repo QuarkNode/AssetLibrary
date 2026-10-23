@@ -1,4 +1,4 @@
-﻿@model Asset
+﻿@model AssetCardViewModel
 
 <div class="asset-card" onclick="if(!event.target.closest('.dropdown')) location.href='@Url.Action("Details", "Asset", new { id = Model.AssetId })';">
     <div class="asset-card-top">
@@ -8,7 +8,7 @@
             <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
 
             <!-- Dropdown Menu -->
-            <div class="dropdown" onclick="event.stopPropagation();">
+            <div class="dropdown">
                 <button class="dropdown-toggle-btn"
                         type="button"
                         data-bs-toggle="dropdown"
@@ -41,9 +41,9 @@
     </div>
 
     <p class="asset-name">@Model.AssetName</p>
-    <span class="asset-material">@(Model.Material?.MaterialName ?? "No material set")</span>
+    <span class="asset-material">@(Model.MaterialName ?? "No material set")</span>
 
     <div class="asset-foot">
-        <span>Revisions: @(Model.CurrentRevision?.RevisionNumber.ToString() ?? "—")</span>
+        <span>Revisions: @(Model.CurrentRevisionNumber?.ToString() ?? "—")</span>
     </div>
 </div>
