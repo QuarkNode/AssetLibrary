@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # Run-time uploading files folder
 AssetLibrary.Web/wwwroot/uploads/
+
+# Keep seed models
+!AssetLibrary.Web/SeedData/Models/
+!AssetLibrary.Web/SeedData/Models/**
