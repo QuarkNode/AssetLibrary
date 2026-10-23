@@ -19,8 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Identity\" />
-    <Folder Include="SeedData\Models\" />
     <Folder Include="wwwroot\uploads\assets\" />
   </ItemGroup>
 
