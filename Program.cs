@@ -3,12 +3,14 @@ namespace AssetLibrary
     using AssetLibrary.Data;
     using AssetLibrary.Data.Models;
     using AssetLibrary.Extensions;
+    using AssetLibrary.Web.Infrastructure;
+
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             string connectionString = GetConnectionString(builder);
@@ -41,6 +43,12 @@ namespace AssetLibrary
             });
 
             WebApplication app = builder.Build();
+
+            // Seeding the Application with pre-existing information to DB for Demo purposes.
+            using (var scope = app.Services.CreateScope())
+            {
+                await DbSeeder.SeedAsync(scope.ServiceProvider);
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
