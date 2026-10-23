@@ -1,0 +1,230 @@
+﻿.pd-wrap {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    color: #2A2E33;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+
+.pd-header {
+    border-bottom: 1px solid #D8D4CB;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.pd-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: #8A8578;
+    margin: 0 0 0.4rem;
+}
+
+.pd-title {
+    font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+    font-size: 2.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    color: #1C1E21;
+}
+
+.pd-desc {
+    max-width: 62ch;
+    color: #5B5749;
+    line-height: 1.55;
+    margin: 0 0 1rem;
+}
+
+.pd-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    color: #6B6656;
+}
+
+    .pd-meta strong {
+        color: #2A2E33;
+        font-weight: 600;
+    }
+
+.status-pill {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+.status-draft {
+    background: #EFEBE2;
+    color: #7A7461;
+    border-color: #D8D2C0;
+}
+
+.status-inreview {
+    background: #FCEEDF;
+    color: #B4622A;
+    border-color: #F0C79A;
+}
+
+.status-released {
+    background: #E7F1E7;
+    color: #3F7A47;
+    border-color: #BEDCC0;
+}
+
+.pd-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1.25rem;
+}
+
+.pd-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: #8A8578;
+}
+
+.pd-add-btn {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    background: #C9612D;
+    border: none;
+    padding: 0.55rem 1.1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+    .pd-add-btn:hover {
+        background: #B0521F;
+        color: #fff;
+    }
+
+.asset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+/* Asset Card Styling */
+.asset-card {
+    background: #FBF9F4;
+    border: 1px solid #E3DFD3;
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    position: relative;
+    cursor: pointer;
+    overflow: visible; /* Prevents dropdown menu clipping */
+    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .asset-card:hover {
+        border-color: #C9612D;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(201, 97, 45, 0.08);
+    }
+
+.asset-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.asset-part-no {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: #8A8578;
+}
+
+.asset-name {
+    font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1C1E21;
+}
+
+.asset-material {
+    font-size: 0.85rem;
+    color: #6B6656;
+}
+
+.asset-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: #8A8578;
+    margin-top: 0.25rem;
+    border-top: 1px solid #EEEAE0;
+    padding-top: 0.55rem;
+}
+
+.checked-out-flag {
+    font-family: 'IBM Plex Mono', monospace;
+    color: #B4622A;
+}
+
+.pd-empty {
+    border: 1px dashed #D8D4CB;
+    border-radius: 8px;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #8A8578;
+}
+
+    .pd-empty a {
+        color: #C9612D;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+/* Action Dropdown Customization */
+.asset-card .dropdown-toggle-btn {
+    background: transparent;
+    border: none;
+    color: #8A8578;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0 0.25rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+    .asset-card .dropdown-toggle-btn:hover {
+        color: #1C1E21;
+        background-color: #EFEBE2;
+    }
+
+.asset-card .dropdown-menu {
+    cursor: default;
+    background-color: #FFFFFF;
+    border: 1px solid #E3DFD3;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    z-index: 1050;
+}
+
+.asset-card .dropdown-item {
+    font-size: 0.85rem;
+    color: #2A2E33;
+    padding: 0.4rem 0.85rem;
+}
+
+    .asset-card .dropdown-item:hover {
+        background-color: #FBF9F4;
+        color: #C9612D;
+    }

@@ -1,99 +1,93 @@
-﻿@using AssetLibrary.Services.Models.Trash
-
-@model DeletedProjectDetailsViewModel // Adjust to your actual namespace/VM name
+﻿@model DeletedProjectDetailsViewModel
 
 @{
     ViewData["Title"] = Model.ProjectName;
+
     const int retentionDays = 30;
+
+    var assets = Model.Assets?.ToList() ?? new List<AssetCardViewModel>();
 }
 
-<div class="home-wrap">
-    <!-- Breadcrumb -->
-    <div class="mb-1 text-muted small font-monospace">
-        <a asp-controller="Projects" asp-action="Index" class="text-decoration-none text-muted">Library</a> /
+@section Styles {
+    <link rel="stylesheet" href="~/css/trash-details.css" asp-append-version="true" />
+}
+
+<div class="pd-wrap">
+
+    <!-- Breadcrumb matching the Trash eyebrow style -->
+    <div class="pd-eyebrow mb-3">
+        <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Library</a> /
         <a asp-controller="Trash" asp-action="Index" class="text-decoration-none text-muted">Trash</a> /
-        Project Details
+        <span>Details</span>
     </div>
 
-    <!-- Trash Warning Callout -->
-    <div class="alert alert-warning py-2 px-3 small d-flex align-items-center mb-4" role="alert">
-        <div>
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            This project is in Trash and will be permanently deleted after <strong>@retentionDays days</strong>.
-        </div>
+    <div class="alert alert-warning py-2 px-3 small mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span>
+            This project is in Trash and will be permanently deleted after
+            <strong>@retentionDays days</strong>.
+        </span>
     </div>
 
-    <!-- Project Header Section -->
-    <div class="home-header align-items-end pb-3 border-bottom mb-4">
-        <div>
-            <span class="home-eyebrow">Deleted Project</span>
-            <h1 class="home-title">@Model.ProjectName</h1>
-            @if (!string.IsNullOrEmpty(Model.Description))
+    <div class="pd-header">
+        <p class="pd-eyebrow">Deleted project</p>
+        <h1 class="pd-title">@Model.ProjectName</h1>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="pd-desc">@Model.Description</p>
+        }
+
+        <div class="pd-meta">
+            @if (!string.IsNullOrWhiteSpace(Model.OwnerFirstName) || !string.IsNullOrWhiteSpace(Model.OwnerLastName))
             {
-                <p class="text-secondary mt-2 mb-0">@Model.Description</p>
+                <span>Owner: <strong>@Model.OwnerFirstName @Model.OwnerLastName</strong></span>
             }
+            @if (Model.DeletedOn is not null)
+            {
+                <span>Deleted: <strong>@Model.DeletedOn.Value.ToLocalTime().ToString("MMM d, yyyy")</strong></span>
+            }
+            <span>
+                Status:
+                <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
+            </span>
         </div>
+    </div>
 
-        <!-- Action Buttons (Restore / Delete) -->
+    @* Toolbar: asset count on left, action buttons on right *@
+    <div class="pd-toolbar">
+        <span class="pd-count">@assets.Count asset@(assets.Count == 1 ? "" : "s")</span>
+
         <div class="d-flex gap-2">
-            <form asp-controller="Projects" asp-action="Restore" asp-route-id="@Model.ProjectId" method="post">
-                <button type="submit" class="btn btn-dark">Restore Project</button>
+            <form asp-controller="Trash" asp-action="Restore" asp-route-id="@Model.ProjectId" method="post">
+                <button type="submit" class="pd-add-btn border-0">Restore project</button>
             </form>
 
-            <form asp-controller="Projects" asp-action="DeletePermanently" asp-route-id="@Model.ProjectId" method="post"
+            <form asp-controller="Trash" asp-action="DeletePermanently" asp-route-id="@Model.ProjectId" method="post"
                   onsubmit="return confirm('Permanently delete this project and all its assets? This cannot be undone.');">
                 <button type="submit" class="btn btn-outline-danger">Delete permanently</button>
             </form>
         </div>
     </div>
 
-    <!-- Metadata Row -->
-    <div class="text-muted small font-monospace mb-5 d-flex gap-4 flex-wrap">
-        @if (!string.IsNullOrEmpty(Model.Owner))
-        {
-            <div>Owner: <span class="text-dark fw-semibold">@Model.Owner</span></div>
-        }
-        @if (Model.DeletedOn is not null)
-        {
-            <div>Deleted: <span class="text-dark fw-semibold">@Model.DeletedOn.Value.ToLocalTime().ToString("dd MMM yyyy")</span></div>
-        }
-        @if (!string.IsNullOrEmpty(Model.Status.ToString()))
-        {
-            <div>
-                Status: <span class="status-pill status-@Model.Status.ToString()">@Model.Status</span>
-            </div>
-        }
-    </div>
-
-    <!-- Assets Section Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="font-monospace text-muted fs-6 mb-0">
-            @Model.Assets.Count @(Model.Assets.Count == 1 ? "asset" : "assets") contained in this project
-        </h4>
-    </div>
-
-    <!-- Asset Cards Grid (Read-only view for Trash) -->
-    @if (Model.Assets != null && Model.Assets.Any())
+    @if (assets.Any())
     {
-        <div class="row g-3">
-            @foreach (var asset in Model.Assets)
+        <div class="asset-grid">
+            @foreach (var asset in assets)
             {
-                <div class="col-sm-6 col-lg-4">
-                    <div class="card project-card h-100 position-relative p-3 bg-light">
-                        <div class="card-body p-0">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5 class="card-title mb-0 fw-bold text-truncate" title="@asset.AssetName">
-                                    @asset.AssetName
-                                </h5>
-                                @if (!string.IsNullOrEmpty(asset.Status.ToString()))
-                                {
-                                    <span class="status-pill status-@asset.Status.ToString()">@asset.Status</span>
-                                }
-                            </div>
-                            <span class="asset-count">
-                                Revisions: @asset.RevisionCount
-                            </span>
-                        </div>
+                <div class="asset-card" style="cursor: default;">
+                    <div class="asset-card-top">
+                        <span class="asset-part-no">@(asset.PartNumber ?? "—")</span>
+                        <span class="status-pill status-@asset.Status.ToString().ToLower()">@asset.Status</span>
+                    </div>
+
+                    <div>
+                        <h5 class="asset-name" title="@asset.AssetName">@asset.AssetName</h5>
+                        <span class="asset-material">@(asset.MaterialName ?? "No material set")</span>
+                    </div>
+
+                    <div class="asset-foot">
+                        <span>Revisions: @asset.RevisionCount</span>
                     </div>
                 </div>
             }
@@ -101,12 +95,6 @@
     }
     else
     {
-        <div class="home-empty">
-            <p class="mb-0">No assets found in this project.</p>
-        </div>
+        <div class="pd-empty">No assets in this deleted project.</div>
     }
 </div>
-
-@section Styles {
-    <link rel="stylesheet" href="~/css/home-index.css" asp-append-version="true" />
-}

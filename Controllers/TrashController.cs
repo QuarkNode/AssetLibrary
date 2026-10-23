@@ -37,14 +37,34 @@ namespace AssetLibrary.Controllers
             return View(project);
         }
 
-        public async Task<IActionResult> Restore() // To-Do
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(int id)
         {
+            var success = await trashService.RestoreProjectAsync(id, User.GetRequiredUserId());
 
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            TempData["SuccessMessage"] = "Project has been restored!";
+            return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> DeletePermanently() // To-Do
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePermanently(int id)
         {
+            var success = await trashService.DeletePermanentlyAsync(id, User.GetRequiredUserId());
 
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            TempData["SuccessMessage"] = "Project has been permanently deleted!";
+            return RedirectToAction("Index");
         }
     }
 }

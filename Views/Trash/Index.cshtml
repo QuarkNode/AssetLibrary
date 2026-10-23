@@ -11,7 +11,7 @@
     <div class="home-header">
         <div>
             <div class="home-eyebrow">
-                <a asp-controller="Projects" asp-action="Index" class="text-decoration-none text-muted">Library</a> / Trash
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Library</a> / Trash
             </div>
             <h1 class="home-title">Trash</h1>
         </div>
@@ -25,7 +25,7 @@
         <div class="home-empty">
             <p class="fs-5 mb-2">Trash is empty</p>
             <p class="mb-4">Deleted projects will show up here for @retentionDays days before being removed permanently.</p>
-            <a asp-controller="Projects" asp-action="Index" class="btn btn-outline-dark">Back to Library</a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-dark">Back to Library</a>
         </div>
     }
     else
@@ -69,11 +69,11 @@
                             </div>
 
                             <div class="card-footer bg-transparent border-0 p-0 pt-3 mt-3 d-flex gap-2" style="position: relative; z-index: 2;">
-                                <form asp-controller="Projects" asp-action="Restore" asp-route-id="@project.ProjectId" method="post">
+                                <form asp-controller="Trash" asp-action="Restore" asp-route-id="@project.ProjectId" method="post">
                                     <button type="submit" class="btn btn-sm btn-dark">Restore</button>
                                 </form>
 
-                                <form asp-controller="Projects" asp-action="DeletePermanently" asp-route-id="@project.ProjectId" method="post"
+                                <form asp-controller="Trash" asp-action="DeletePermanently" asp-route-id="@project.ProjectId" method="post"
                                       onsubmit="return confirm('Permanently delete this project and all its assets? This cannot be undone.');">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete permanently</button>
                                 </form>

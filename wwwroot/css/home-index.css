@@ -64,6 +64,7 @@
 /* Thumbnail: a faint CAD grid, with the image on top */
 .project-thumb {
     position: relative;
+    overflow: visible;
     aspect-ratio: 16 / 9;
     border-radius: 7px 7px 0 0;
     background: linear-gradient(145deg, #F1EDE5 0%, #E8E3D8 100%);
