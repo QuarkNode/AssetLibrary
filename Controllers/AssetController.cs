@@ -1,10 +1,9 @@
-﻿using AssetLibrary.Services.Contracts;
+﻿using AssetLibrary.Extensions;
+using AssetLibrary.Services.Contracts;
 using AssetLibrary.Services.Models.Asset;
 using AssetLibrary.Services.Models.Revision;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using System.Security.Claims;
 
 namespace AssetLibrary.Controllers
 {
@@ -43,15 +42,7 @@ namespace AssetLibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> DownloadRevision(int id) // id = Revision Id
         {
-
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
-            var revision = await assetService.GetRevisionFileAsync(id, userId.Value);
+            var revision = await assetService.GetRevisionFileAsync(id, User.GetRequiredUserId());
 
             if (revision == null)
             {
@@ -72,14 +63,7 @@ namespace AssetLibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id) // id = Asset Id
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Challenge();
-            }
-
-            var model = await assetService.GetEditFormAsync(id, userId.Value);
+            var model = await assetService.GetEditFormAsync(id, User.GetRequiredUserId());
 
             if (model == null)
             {
@@ -93,12 +77,6 @@ namespace AssetLibrary.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(EditAssetViewModel model)
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Challenge();
-            }
 
             if (!ModelState.IsValid)
             {
@@ -106,9 +84,9 @@ namespace AssetLibrary.Controllers
                 model.Projects = await assetService.GetProjectsAsync();
             }
 
-            bool sucess = await assetService.EditAsync(model, userId.Value);
+            bool success = await assetService.EditAsync(model, User.GetRequiredUserId());
 
-            if (!sucess)
+            if (!success)
             {
                 return NotFound();
             }
@@ -119,14 +97,7 @@ namespace AssetLibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> ReplaceFile(int id)
         {
-            int? userId = GetUserId(); // Assuming you have a helper method for this
-
-            if (!userId.HasValue)
-            {
-                return Challenge();
-            }
-
-            var model = await assetService.GetReplaceAssetFileViewModelAsync(id, userId.Value);
+            var model = await assetService.GetReplaceAssetFileViewModelAsync(id, User.GetRequiredUserId());
 
             if (model == null)
             {
@@ -140,19 +111,12 @@ namespace AssetLibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReplaceFile(ReplaceAssetFileViewModel model)
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Challenge();
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            bool success = await assetService.ReplaceCurrentRevisionFileAsync(model.AssetId, userId.Value, model);
+            bool success = await assetService.ReplaceCurrentRevisionFileAsync(model.AssetId, User.GetRequiredUserId(), model);
 
             if (!success)
             {
@@ -169,14 +133,7 @@ namespace AssetLibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> AddRevision(int id)
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
-            var model = await assetService.GetAddRevisionViewModelAsync(id, userId.Value);
+            var model = await assetService.GetAddRevisionViewModelAsync(id, User.GetRequiredUserId());
 
             if (model == null)
             {
@@ -189,15 +146,8 @@ namespace AssetLibrary.Controllers
         [HttpPost]
         public async Task<IActionResult> AddRevision(AddRevisionViewModel model)
         {
-            int? userId = GetUserId();
 
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
-            // Populate metadata and ensure asset exists/belongs to user
-            bool exists = await assetService.PopulateRevisionMetadataAsync(model, userId.Value);
+            bool exists = await assetService.PopulateRevisionMetadataAsync(model, User.GetRequiredUserId());
             if (!exists)
             {
                 return NotFound();
@@ -208,7 +158,7 @@ namespace AssetLibrary.Controllers
                 return View(model);
             }
 
-            bool success = await assetService.CreateRevisionAsync(model, userId.Value);
+            bool success = await assetService.CreateRevisionAsync(model, User.GetRequiredUserId());
             if (!success)
             {
                 return NotFound();
@@ -216,12 +166,5 @@ namespace AssetLibrary.Controllers
 
             return RedirectToAction(nameof(Details), new { id = model.AssetId });
         }
-
-        private int? GetUserId()
-        {
-            return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) ? userId : null;
-        }
-
-
     }
 }

@@ -10,10 +10,19 @@
 }
 
 <div class="ad-wrap">
-    <!--- Back Navigation --->
-    <a class="ad-back" asp-controller="Project" asp-action="Details" asp-route-id="@Model.Project.ProjectId">
-        &larr; Back to @Model.Project.ProjectName
-    </a>
+    <!--- Breadcrumb Navigation --->
+    <div class="ad-eyebrow mb-3">
+        <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Library</a> /
+        @if (Model.Project != null)
+        {
+            <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.Project.ProjectId" class="text-decoration-none text-muted">@Model.Project.ProjectName</a>
+        }
+        else
+        {
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Project</a>
+        }
+        / <span>@Model.AssetName</span>
+    </div>
 
     <div class="ad-header">
         <p class="ad-eyebrow">@Model.PartNumber</p>
@@ -47,7 +56,7 @@
             }
         </div>
 
-        @if (orderedRevisions.Any())
+        @if (orderedRevisions != null && orderedRevisions.Any())
         {
             <table class="ad-revision-table">
                 <thead>
@@ -85,5 +94,4 @@
             <div class="ad-empty">No revisions uploaded yet.</div>
         }
     </div>
-
 </div>
