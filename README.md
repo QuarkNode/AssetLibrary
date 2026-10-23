@@ -101,7 +101,7 @@ Small test models are included in `AssetLibrary.Web/SeedData/Models/`. Use them 
 
 ## Database
 
-Main entities: `User`, `Project`, `Asset`, `Revision`, `Material`, `Status`.
+Main entities: `User`, `Project`, `Asset`, `Revision`, `Material`.
 
 <img width="1225" height="875" alt="ER Diagram" src="https://github.com/user-attachments/assets/1558407c-c47c-4491-aea8-051eec476317" />
 
