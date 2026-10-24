@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="AssetLibrary.Data/AssetLibrary.Data.csproj" Id="d5414188-1542-450b-9559-2a061fc024d7" />
+  <Project Path="AssetLibrary.Services/AssetLibrary.Services.csproj" Id="3ac1d6bd-7206-4a00-85a5-d541c12a17b0" />
+  <Project Path="AssetLibrary.Web/AssetLibrary.Web.csproj" />
+</Solution>
