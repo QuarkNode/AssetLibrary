@@ -1,0 +1,26 @@
+﻿namespace AssetLibrary.Services.Contracts
+{
+    using AssetLibrary.Data.Models;
+    using AssetLibrary.Services.Models.Asset;
+    using AssetLibrary.Services.Models.Revision;
+    using Microsoft.AspNetCore.Mvc.Rendering;
+
+    public interface IAssetService
+    {
+        /* Description: Asset details, create, add revision, edit, soft delete; Never decides what HTTP result to return. */
+
+        // Read
+
+        public Task<Asset?> GetAssetDetailsAsync(int assetId);
+        public Task<RevisionFileDto?> GetRevisionFileAsync(int revisionId, int userId);
+        public Task<AddRevisionViewModel?> GetAddRevisionViewModelAsync(int assetId, int userId);
+        public Task<bool> PopulateRevisionMetadataAsync(AddRevisionViewModel model, int userId);
+        public Task<bool> CreateRevisionAsync(AddRevisionViewModel model, int userId);
+        public Task<EditAssetViewModel?> GetEditFormAsync(int assetId, int userId);
+        public Task<bool> EditAsync(EditAssetViewModel model, int userId);
+        public Task<IEnumerable<SelectListItem>> GetMaterialsAsync();
+        public Task<IEnumerable<SelectListItem>> GetProjectsAsync();
+        public Task<ReplaceAssetFileViewModel?> GetReplaceAssetFileViewModelAsync(int assetId, int userId);
+        public Task<bool> ReplaceCurrentRevisionFileAsync(int assetId, int userId, ReplaceAssetFileViewModel model);
+    }
+}
