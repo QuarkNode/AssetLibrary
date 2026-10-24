@@ -8,7 +8,7 @@
     public class RegisterViewModel
     {
         [Required(ErrorMessage = "Username is required")]
-        [StringLength(UsernameMaxLength, MinimumLength = UsernameMinLength,
+        [StringLength(RegisterUsernameMaxLength, MinimumLength = RegisterUsernameMinLength,
             ErrorMessage = "Username needs to be between {2} and {1} symbols")]
         public string Username { get; set; } = null!;
 
@@ -36,13 +36,13 @@
         public string? CompanyName { get; set; }
 
         [Required(ErrorMessage = "First name is required")]
-        [StringLength(FirstNameMaxLength, MinimumLength = FirstNameMinLength,
+        [StringLength(RegisterFirstNameMaxLength, MinimumLength = RegisterFirstNameMinLength,
             ErrorMessage = "First name needs to be between {2} and {1} symbols")]
         [Display(Name = "First Name")]
         public string FirstName { get; set; } = null!;
 
         [Required(ErrorMessage = "Last name is required")]
-        [StringLength(LastNameMaxLength, MinimumLength = LastNameMinLength,
+        [StringLength(RegisterLastNameMaxLength, MinimumLength = RegisterLastNameMinLength,
             ErrorMessage = "Last name needs to be between {2} and {1} symbols")]
         [Display(Name = "Last Name")]
         public string LastName { get; set; } = null!;
@@ -51,16 +51,16 @@
 
         [Required(ErrorMessage = "Date of birth is required")]
         [DataType(DataType.DateTime)]
-        [MinimumAge(MinimumRegistrationAge)]
+        [MinimumAge(RegisterMinimumRegistrationAge)]
         [Display(Name = "Date of Birth")]
         public DateTime DateOfBirth { get; set; } = DateTime.UtcNow;
 
         [Required(ErrorMessage = "City is required")]
-        [StringLength(CityMaxLength, MinimumLength = CityMinLength)]
+        [StringLength(RegisterCityMaxLength, MinimumLength = RegisterCityMinLength)]
         public string City { get; set; } = null!;
 
         [Required(ErrorMessage = "Country is required")]
-        [StringLength(CountryMaxLength, MinimumLength = CountryMinLength)]
+        [StringLength(RegisterCountryMaxLength, MinimumLength = RegisterCountryMinLength)]
         public string Country { get; set; } = null!;
     }
 }

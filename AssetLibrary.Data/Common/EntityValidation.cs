@@ -10,14 +10,8 @@
         public const int FirstNameMinLength = 1;
         public const int FirstNameMaxLength = 50;
 
-        public const int MiddleNameMinLength = 1;
-        public const int MiddleNameMaxLength = 50;
-
         public const int LastNameMinLength = 1;
         public const int LastNameMaxLength = 50;
-
-        public const int OccupationMinLength = 1;
-        public const int OccupationMaxLength = 100;
 
         public const int CityMinLength = 1;
         public const int CityMaxLength = 50;
@@ -30,7 +24,6 @@
 
         /* Asset Begin */
 
-        public const int PartNumberMinLength = 1;
         public const int PartNumberMaxLength = 50;
 
         public const int AssetNameMinLength = 1;

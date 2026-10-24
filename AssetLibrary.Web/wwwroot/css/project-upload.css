@@ -1,0 +1,56 @@
+﻿/* Hide panes by default */
+.project-panes .pane {
+    display: none;
+}
+
+/* Active Tab Styling (Soft Primary Tint) */
+.project-tab-container #modeExisting:checked ~ .btn-group label[for="modeExisting"],
+.project-tab-container #modeNew:checked ~ .btn-group label[for="modeNew"] {
+    background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
+    color: var(--bs-primary) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Hover Effect for Unselected/All Tabs */
+.btn-group .btn:hover {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+}
+
+/* Show Selected Pane */
+.project-tab-container #modeExisting:checked ~ .project-panes #existingProjectPane,
+.project-tab-container #modeNew:checked ~ .project-panes #newProjectPane {
+    display: block;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Smooth Fade Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dashed Upload Border */
+.border-dashed {
+    border: 2px dashed #dee2e6 !important;
+    transition: all 0.2s ease-in-out;
+}
+
+    .border-dashed:hover {
+        border-color: var(--bs-primary) !important;
+        background-color: rgba(var(--bs-primary-rgb), 0.02);
+    }
+
+/* Input Focus State */
+.form-control:focus, .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15);
+}

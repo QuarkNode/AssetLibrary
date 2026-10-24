@@ -24,6 +24,8 @@
                     .ThenInclude(r => r.Revisions)
                 .Include(p => p.Assets)
                     .ThenInclude(m => m.Material)
+                .Include(p => p.Assets)
+                    .ThenInclude(a => a.CurrentRevision)
                 .FirstOrDefaultAsync(p => p.ProjectId == projectId && p.IsDeleted);
 
             if (project == null)
@@ -47,9 +49,10 @@
                     AssetName = a.AssetName,
                     Status = a.Status,
                     IsDeleted = true,
-                    RevisionCount = a.Revisions.Count,
+                    CurrentRevisionNumber = a.CurrentRevision?.RevisionNumber.ToString(),
+                    RevisionCount = a.Revisions?.Count ?? 0,
                     PartNumber = a.PartNumber,
-                    MaterialName = a.Material.MaterialName
+                    MaterialName = a.Material?.MaterialName
                 })
                 .ToList()
             };

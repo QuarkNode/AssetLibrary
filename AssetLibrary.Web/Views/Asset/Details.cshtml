@@ -6,92 +6,123 @@
 }
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/asset-details.css" />
+    <link rel="stylesheet" href="~/css/asset-details.css" asp-append-version="true" />
 }
 
-<div class="ad-wrap">
-    <!--- Breadcrumb Navigation --->
-    <div class="ad-eyebrow mb-3">
-        <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Library</a> /
-        @if (Model.Project != null)
-        {
-            <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.Project.ProjectId" class="text-decoration-none text-muted">@Model.Project.ProjectName</a>
-        }
-        else
-        {
-            <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Project</a>
-        }
-        / <span>@Model.AssetName</span>
-    </div>
+<div class="container py-5">
+    
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0 small text-muted">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Library</a></li>
+            @if (Model.Project != null)
+            {
+                <li class="breadcrumb-item"><a asp-controller="Project" asp-action="Details" asp-route-id="@Model.Project.ProjectId" class="text-decoration-none text-muted">@Model.Project.ProjectName</a></li>
+            }
+            else
+            {
+                <li class="breadcrumb-item text-muted">Project</li>
+            }
+            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">@Model.AssetName</li>
+        </ol>
+    </nav>
 
-    <div class="ad-header">
-        <p class="ad-eyebrow">@Model.PartNumber</p>
-        <h1 class="ad-title">@Model.AssetName</h1>
-        <!--- Model Description --->
-        @if (!string.IsNullOrWhiteSpace(Model.Description))
-        {
-            <p class="ad-desc">@Model.Description</p>
-        }
+    <!-- Main Header Card -->
+    <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 mb-4 bg-white">
+        <div class="row align-items-center g-4">
+            
+            <!-- Asset Info / Title -->
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary font-monospace px-2.5 py-1 rounded-2 small">@Model.PartNumber</span>
+                    <span class="status-pill status-@Model.Status.ToString().ToLower() px-2.5 py-1 rounded-pill small fw-semibold">@Model.Status</span>
+                </div>
+                
+                <h1 class="h2 fw-bold text-dark mb-2">@Model.AssetName</h1>
+                
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <p class="text-muted mb-4">@Model.Description</p>
+                }
 
-        <div class="ad-meta">
-            <span>
-                Status:
-                <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
-            </span>
-            <span>Material: <strong>@(Model.Material?.MaterialName ?? "Not set")</strong></span>
-            <span>Owner: <strong>@Model.Owner?.FirstName @Model.Owner?.LastName</strong></span>
-            <span>Created: <strong>@Model.CreatedOn.ToString("MMM d, yyyy")</strong></span>
-            <a asp-controller="Asset" asp-action="AddRevision" asp-route-id="@Model.AssetId"
-               class="btn btn-primary">Upload new revision</a>
+                <!-- Compact Inline Meta Badges -->
+                <div class="d-flex flex-wrap gap-3 text-secondary small pt-2 border-top">
+                    <div><i class="bi bi-box me-1 text-primary"></i> Material: <strong class="text-dark">@(Model.Material?.MaterialName ?? "Not set")</strong></div>
+                    <div><i class="bi bi-person me-1 text-primary"></i> Owner: <strong class="text-dark">@Model.Owner?.FirstName @Model.Owner?.LastName</strong></div>
+                    <div><i class="bi bi-calendar3 me-1 text-primary"></i> Created: <strong class="text-dark">@Model.CreatedOn.ToString("MMM d, yyyy")</strong></div>
+                </div>
+            </div>
+
+            <!-- Action Button Column -->
+            <div class="col-lg-4 text-lg-end">
+                <a asp-controller="Asset" asp-action="AddRevision" asp-route-id="@Model.AssetId"
+                   class="btn btn-primary px-4 py-3 rounded-3 shadow-sm fw-semibold w-100 w-lg-auto">
+                    <i class="bi bi-cloud-upload me-2"></i> Upload New Revision
+                </a>
+            </div>
+
         </div>
-
     </div>
-    <!-- Revision Specification -->
-    <div class="ad-section">
-        <div class="ad-section-head">
-            <h2 class="ad-section-title">Revision history</h2>
+
+    <!-- Revision History Card -->
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
+        
+        <!-- Card Header Bar -->
+        <div class="card-header bg-transparent border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="h5 fw-bold text-dark mb-1">Revision History</h2>
+                <p class="text-muted small mb-0">Track all uploaded iterations and source files for this asset.</p>
+            </div>
             @if (Model.CurrentRevision != null)
             {
-                <span class="ad-current-tag">Current: Rev @Model.CurrentRevision.RevisionNumber</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 rounded-pill fw-semibold small">
+                    <i class="bi bi-check-circle-fill me-1"></i> Current: Rev @Model.CurrentRevision.RevisionNumber
+                </span>
             }
         </div>
 
-        @if (orderedRevisions != null && orderedRevisions.Any())
-        {
-            <table class="ad-revision-table">
-                <thead>
-                    <tr>
-                        <th>Rev</th>
-                        <th>Uploaded</th>
-                        <th>By</th>
-                        <th>Size</th>
-                        <th>Notes</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Revision Details -->
-                    @foreach (var rev in orderedRevisions)
-                    {
-                        <tr class="@(Model.CurrentRevisionId == rev.RevisionId ? "ad-row-current" : "")">
-                            <td class="ad-mono">@rev.RevisionNumber</td>
-                            <td class="ad-mono">@rev.UploadedOn.ToString("MMM d, yyyy h:mm tt")</td>
-                            <td>@rev.UploadedByUser?.FirstName @rev.UploadedByUser?.LastName</td>
-                            <td class="ad-mono">@((rev.FileSizeBytes / 1024.0).ToString("0.#")) KB</td>
-                            <td>@rev.ChangeNotes</td>
-                            <td>
-                                <a class="ad-download" asp-controller="Asset" asp-action="DownloadRevision" asp-route-id="@rev.RevisionId">
-                                    Download
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <div class="ad-empty">No revisions uploaded yet.</div>
-        }
+        <div class="card-body p-4">
+            @if (orderedRevisions != null && orderedRevisions.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr class="text-uppercase text-muted fs-7 border-bottom">
+                                <th class="py-3 ps-3">Rev</th>
+                                <th class="py-3">Uploaded On</th>
+                                <th class="py-3">Uploaded By</th>
+                                <th class="py-3">Size</th>
+                                <th class="py-3">Notes</th>
+                                <th class="py-3 text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var rev in orderedRevisions)
+                            {
+                                <tr class="@(Model.CurrentRevisionId == rev.RevisionId ? "table-light fw-medium" : "") border-bottom">
+                                    <td class="ps-3 font-monospace fw-bold text-primary">@(rev.RevisionNumber)</td>
+                                    <td class="text-muted small font-monospace">@rev.UploadedOn.ToString("MMM d, yyyy h:mm tt")</td>
+                                    <td>@rev.UploadedByUser?.FirstName @rev.UploadedByUser?.LastName</td>
+                                    <td class="text-muted small font-monospace">@((rev.FileSizeBytes / 1024.0).ToString("0.#")) KB</td>
+                                    <td class="text-muted">@(string.IsNullOrEmpty(rev.ChangeNotes) ? "—" : rev.ChangeNotes)</td>
+                                    <td class="text-end pe-3">
+                                        <a class="btn btn-sm btn-outline-secondary px-3 rounded-pill fw-semibold shadow-sm" asp-controller="Asset" asp-action="DownloadRevision" asp-route-id="@rev.RevisionId">
+                                            <i class="bi bi-download me-1"></i> Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-folder-x display-6 mb-2 d-block text-secondary opacity-50"></i>
+                    <p class="mb-0">No revisions uploaded yet.</p>
+                </div>
+            }
+        </div>
     </div>
 </div>

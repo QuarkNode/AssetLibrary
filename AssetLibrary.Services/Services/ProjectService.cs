@@ -1,6 +1,7 @@
 ﻿namespace AssetLibrary.Services.Services
 {
     using AssetLibrary.Data;
+    using AssetLibrary.Data.Exceptions;
     using AssetLibrary.Data.Models;
     using AssetLibrary.Data.Models.Enum;
 
@@ -11,6 +12,8 @@
 
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
+
+    using static AssetLibrary.Data.Common.ViewModelValidation;
 
     public class ProjectService : IProjectService
     {
@@ -25,15 +28,6 @@
 
         public async Task<ProjectDetailsViewModel?> GetDetailsAsync(int projectId)
         {
-            //var project = await dbContext.Projects
-            //    .AsNoTracking()
-            //    .Include(p => p.Owner)
-            //    .Include(p => p.Assets)
-            //        .ThenInclude(a => a.Material)
-            //    .Include(p => p.Assets)
-            //        .ThenInclude(a => a.CurrentRevision)
-            //    .FirstOrDefaultAsync(p => p.ProjectId == projectId);
-
             var projectViewModel = await dbContext.Projects
                 .Where(p => p.ProjectId == projectId && !p.IsDeleted)
                 .Select(p => new ProjectDetailsViewModel
@@ -56,12 +50,11 @@
                             Status = a.Status,
                             MaterialName = a.Material.MaterialName,
                             CurrentRevisionNumber = a.CurrentRevision != null ? a.CurrentRevision.RevisionNumber.ToString() : string.Empty,
-                            IsDeleted = false // Explicitly set for active view context
+                            IsDeleted = false
                         })
                         .ToList()
                 })
                 .FirstOrDefaultAsync();
-
 
             return projectViewModel;
         }
@@ -101,6 +94,11 @@
 
         public async Task ProcessAssetUploadViewModelAsync(AddAssetViewModel model, int userId)
         {
+            //int count = await dbContext.Projects
+            //    .AsNoTracking()
+            //    .CountAsync(P => P.OwnerId == userId && !P.IsDeleted);
+
+
             Asset asset = new Asset
             {
                 ProjectId = model.ProjectId,
@@ -142,10 +140,23 @@
         }
         public async Task<int> ProcessAssetUploadViewModelAsync(UploadAssetViewModel viewModel, int userId)
         {
+            int count = await dbContext.Projects
+                .CountAsync(p => p.OwnerId == userId);
+
+            if (count >= ProjectsMaxLength)
+            {
+                throw new ProjectLimitExceededException(ProjectsMaxLength);
+            }
+
             int projectId;
 
             if (viewModel.IsNewProject)
             {
+                if (count >= ProjectsMaxLength)
+                {
+                    throw new ProjectLimitExceededException(ProjectsMaxLength);
+                }
+
                 Project newProject = CreateNewProject(viewModel, userId);
 
                 dbContext.Projects.Add(newProject);
@@ -155,6 +166,14 @@
             }
             else
             {
+                bool owns = await dbContext.Projects
+                    .AnyAsync(p => p.ProjectId == viewModel.ProjectId && p.OwnerId == userId);
+
+                if (!owns)
+                {
+                    throw new InvalidOperationException("Project not found.");
+                }
+
                 projectId = viewModel.ProjectId!.Value;
             }
 

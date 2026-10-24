@@ -4,68 +4,88 @@
     ViewData["Title"] = "Upload New Revision";
 }
 
-<div class="container py-4">
+<div class="container py-5">
     <!-- Back Navigation -->
-    <div class="mb-3">
-        <a asp-controller="Asset" asp-action="Details" asp-route-id="@Model.AssetId" class="text-decoration-none text-muted fw-semibold">
-            &larr; Back to asset
-        </a>
+    <div class="row justify-content-center mb-3">
+        <div class="col-lg-8 col-md-10">
+            <a asp-controller="Asset" asp-action="Details" asp-route-id="@Model.AssetId" class="text-decoration-none text-muted fw-semibold small">
+                &larr; Back to asset
+            </a>
+        </div>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4 p-md-5">
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- Simple & Clean Header with Revision Badge -->
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-1">Upload New Revision</h1>
+                    <p class="text-muted small mb-0">Asset: <strong class="text-dark">@Model.AssetName</strong></p>
+                </div>
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-3 fw-semibold small">
+                    <i class="bi bi-layers text-primary me-1"></i> Rev @Model.NextRevisionNumber
+                </span>
+            </div>
 
-                    <!-- Header -->
-                    <div class="mb-4">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <h2 class="fw-bold mb-0">Upload New Revision</h2>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6 px-3 py-2 rounded-pill">
-                                Rev @Model.NextRevisionNumber
-                            </span>
-                        </div>
-                        <p class="text-muted small mb-0">
-                            Asset: <strong class="text-dark">@Model.AssetName</strong>
-                        </p>
-                    </div>
-
-                    <!-- Form -->
-                    <form asp-action="AddRevision" method="post" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small py-2" role="alert"></div>
+            <!-- Sleek Card Container -->
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5 bg-white">
+                    <form asp-action="AddRevision" method="post" enctype="multipart/form-data" class="needs-validation">
+                        
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 small py-2" role="alert"></div>
 
                         <input type="hidden" asp-for="AssetId" />
 
-                        <!-- File Input -->
-                        <div class="form-group mb-3">
-                            <label asp-for="File" class="form-label fw-semibold">3D Model File</label>
-                            <input asp-for="File" type="file" class="form-control rounded-3" accept=".obj,.stl,.fbx" />
-                            <div class="form-text text-muted small mt-1">
-                                Accepted formats: <code>.obj</code>, <code>.stl</code>, <code>.fbx</code>
+                        <!-- File Input Section -->
+                        <div class="mb-4">
+                            <h2 class="h6 text-uppercase text-muted fw-bold mb-3 tracking-wider">
+                                <i class="bi bi-file-earmark-arrow-up text-primary me-2"></i> File Upload
+                            </h2>
+
+                            <div>
+                                <label asp-for="File" class="form-label fw-semibold small">3D Model File</label>
+                                <div class="file-upload-wrapper border border-2 border-dashed rounded-3 p-4 text-center bg-light">
+                                    <i class="bi bi-cloud-upload display-6 text-primary mb-2 d-block"></i>
+                                    <input asp-for="File" type="file" class="form-control form-control-sm border-0 bg-transparent mx-auto w-auto" accept=".obj,.stl,.fbx" />
+                                    <div class="form-text text-muted mt-2">
+                                        Accepted formats: <span class="badge bg-secondary text-light">.obj</span> <span class="badge bg-secondary text-light">.stl</span> <span class="badge bg-secondary text-light">.fbx</span>
+                                    </div>
+                                </div>
+                                <span asp-validation-for="File" class="text-danger small mt-1 d-block"></span>
                             </div>
-                            <span asp-validation-for="File" class="text-danger small mt-1 d-block"></span>
                         </div>
 
-                        <!-- Change Notes -->
-                        <div class="form-group mb-4">
-                            <label asp-for="ChangeNotes" class="form-label fw-semibold">Change Notes</label>
-                            <textarea asp-for="ChangeNotes" class="form-control rounded-3" rows="4"
-                                      placeholder="e.g. Thickened the mounting arms by 2 mm"></textarea>
-                            <span asp-validation-for="ChangeNotes" class="text-danger small mt-1 d-block"></span>
+                        <!-- Change Notes Section -->
+                        <div class="mb-4">
+                            <h2 class="h6 text-uppercase text-muted fw-bold mb-3 tracking-wider">
+                                <i class="bi bi-journal-text text-primary me-2"></i> Revision Notes
+                            </h2>
+
+                            <div>
+                                <label asp-for="ChangeNotes" class="form-label fw-semibold small">Change Notes</label>
+                                <textarea asp-for="ChangeNotes" class="form-control rounded-3" rows="4"
+                                          placeholder="e.g. Thickened the mounting arms by 2 mm"></textarea>
+                                <span asp-validation-for="ChangeNotes" class="text-danger small mt-1 d-block"></span>
+                            </div>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                             <a asp-controller="Asset" asp-action="Details" asp-route-id="@Model.AssetId"
-                               class="btn btn-outline-secondary px-4 rounded-pill">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">
-                                Upload Revision
+                               class="btn btn-light px-4 py-2 rounded-3 text-secondary fw-semibold border">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-semibold shadow-sm">
+                                <i class="bi bi-cloud-upload me-2"></i> Upload Revision
                             </button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

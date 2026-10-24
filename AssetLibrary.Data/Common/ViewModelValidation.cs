@@ -2,40 +2,40 @@
 {
     public class ViewModelValidation
     {
-        /* AssetUpload Begin */
+        /* Asset Begin */
 
         public const int AssetNameMinLength = 1;
         public const int AssetNameMaxLength = 100;
 
-        public const int PartNumberMinLength = 1;
-        public const int PartNumberMaxLength = 50;
+        public const int AssetPartNumberMinLength = 1;
+        public const int AssetPartNumberMaxLength = 50;
 
-        public const int AssetUploadDescriptionMaxLength = 500;
+        public const int AssetDescriptionMaxLength = 500;
 
-        /* AssetUpload Ending */
+        /* Asset Ending */
 
         /* Register Begin */
-        public const int UsernameMinLength = 3;
-        public const int UsernameMaxLength = 30;
+        public const int RegisterUsernameMinLength = 3;
+        public const int RegisterUsernameMaxLength = 30;
 
-        public const int MinimumRegistrationAge = 16;
-        public const int FirstNameMinLength = 1;
-        public const int FirstNameMaxLength = 50;
+        public const int RegisterMinimumRegistrationAge = 16;
+        public const int RegisterFirstNameMinLength = 1;
+        public const int RegisterFirstNameMaxLength = 50;
 
-        public const int LastNameMinLength = 1;
-        public const int LastNameMaxLength = 50;
+        public const int RegisterLastNameMinLength = 1;
+        public const int RegisterLastNameMaxLength = 50;
 
-        public const int CityMinLength = 1;
-        public const int CityMaxLength = 50;
+        public const int RegisterCityMinLength = 1;
+        public const int RegisterCityMaxLength = 50;
 
-        public const int CountryMinLength = 1;
-        public const int CountryMaxLength = 80;
+        public const int RegisterCountryMinLength = 1;
+        public const int RegisterCountryMaxLength = 80;
 
-        /* Register Енд */
+        /* Register End */
 
         /* Home Begin */
 
-        public const int ProjectsMaxLength = 200;
+        public const int ProjectsMaxLength = 20;
 
         public const int ProjectCountMinLength = 0;
         public const int ProjectCountMaxLength = 200;

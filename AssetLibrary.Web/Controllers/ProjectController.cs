@@ -1,11 +1,12 @@
 ﻿namespace AssetLibrary.Controllers
 {
+    using AssetLibrary.Data.Exceptions;
+    using AssetLibrary.Extensions;
     using AssetLibrary.Services.Contracts;
     using AssetLibrary.Services.Models.Asset;
     using AssetLibrary.Services.Models.Project;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using System.Security.Claims;
 
     [Authorize]
     public class ProjectController : Controller
@@ -19,14 +20,6 @@
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
             var project = await projectService.GetDetailsAsync(id);
 
             if (project == null)
@@ -41,14 +34,7 @@
         [HttpPost]
         public async Task<IActionResult> Delete(int id) // id = ProjectId
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Challenge();
-            }
-
-            bool deleted = await projectService.DeleteProjectAsync(id, userId.Value);
+            bool deleted = await projectService.DeleteProjectAsync(id, User.GetRequiredUserId());
 
             if (!deleted)
             {
@@ -62,14 +48,7 @@
         [HttpGet]
         public async Task<IActionResult> Edit(int id) // id = ProjectId
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Challenge();
-            }
-
-            var model = await projectService.GetEditFormAsync(id, userId.Value);
+            var model = await projectService.GetEditFormAsync(id, User.GetRequiredUserId());
 
             if (model == null)
             {
@@ -82,19 +61,12 @@
         [HttpPost]
         public async Task<IActionResult> Edit(EditProjectViewModel model)
         {
-            int? userId = GetUserId();
-
-            if (userId == null)
-            {
-                return Unauthorized();
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            bool updated = await projectService.EditAsync(model, userId.Value);
+            bool updated = await projectService.EditAsync(model, User.GetRequiredUserId());
 
             if (!updated)
             {
@@ -122,22 +94,21 @@
                 return View(viewModel);
             }
 
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
             try
             {
-                int projectId = await projectService.ProcessAssetUploadViewModelAsync(viewModel, userId.Value);
+                int projectId = await projectService.ProcessAssetUploadViewModelAsync(viewModel, User.GetRequiredUserId());
 
                 return RedirectToAction("Details", "Project", new { id = projectId });
             }
+            catch (ProjectLimitExceededException ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+
+                return View(viewModel);
+            }
             catch (Exception)
             {
-                ModelState.AddModelError(string.Empty, "An error occurred saving the asset");
+                ModelState.AddModelError(string.Empty, "An error occured saving the asset.");
 
                 return View(viewModel);
             }
@@ -146,14 +117,8 @@
         [HttpGet]
         public async Task<IActionResult> Add(int id)
         {
-            int? userId = GetUserId();
 
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
-            var projectName = await projectService.GetProjectNameAsync(id, userId.Value);
+            var projectName = await projectService.GetProjectNameAsync(id, User.GetRequiredUserId());
 
             if (projectName == null)
             {
@@ -169,14 +134,7 @@
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(AddAssetViewModel model)
         {
-            int? userId = GetUserId();
-
-            if (!userId.HasValue)
-            {
-                return Unauthorized();
-            }
-
-            var projectName = await projectService.GetProjectNameAsync(model.ProjectId, userId.Value);
+            var projectName = await projectService.GetProjectNameAsync(model.ProjectId, User.GetRequiredUserId());
 
             if (projectName == null)
             {
@@ -195,7 +153,7 @@
 
             try
             {
-                await projectService.ProcessAssetUploadViewModelAsync(model, userId.Value);
+                await projectService.ProcessAssetUploadViewModelAsync(model, User.GetRequiredUserId());
                 return RedirectToAction("Details", "Project", new { id = model.ProjectId });
             }
             catch (Exception)
@@ -209,13 +167,6 @@
                 return View(model);
             }
 
-        }
-
-
-        // Methods
-        private int? GetUserId()
-        {
-            return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) ? userId : null;
         }
     }
 }

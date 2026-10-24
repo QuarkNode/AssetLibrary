@@ -5,58 +5,64 @@
     ViewData["Title"] = "Edit Project";
 }
 
-<div class="container py-4">
+<div class="container py-5">
     <!-- Back Navigation -->
-    <div class="mb-3">
-        <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.ProjectId" class="text-decoration-none text-muted fw-semibold">
-            &larr; Back to project
-        </a>
+    <div class="row justify-content-center mb-3">
+        <div class="col-lg-8 col-md-10">
+            <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.ProjectId" class="text-decoration-none text-muted fw-semibold small">
+                &larr; Back to project
+            </a>
+        </div>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-body p-4 p-md-5">
+        <div class="col-lg-8 col-md-10">
+            
+            <!-- Simple & Clean Header -->
+            <div class="mb-4">
+                <h1 class="h3 fw-bold text-dark mb-1">Edit Project</h1>
+                <p class="text-muted small mb-0">Update the details for your project below.</p>
+            </div>
 
-                    <!-- Header -->
-                    <div class="mb-4">
-                        <h2 class="fw-bold mb-1">Edit Project</h2>
-                        <p class="text-muted small">Update the details for your project below.</p>
-                    </div>
-
-                    <!-- Form -->
+            <!-- Sleek Card Container -->
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4 p-md-5 bg-white">
                     <form asp-action="Edit" method="post" novalidate>
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small py-2" role="alert"></div>
+                        
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 small py-2" role="alert"></div>
 
                         <input type="hidden" asp-for="ProjectId" />
 
-                        <div class="form-group mb-3">
-                            <label asp-for="ProjectName" class="form-label fw-semibold"></label>
-                            <input asp-for="ProjectName" class="form-control rounded-3" placeholder="Enter project name..." />
+                        <!-- Project Name -->
+                        <div class="mb-3">
+                            <label asp-for="ProjectName" class="form-label fw-semibold small"></label>
+                            <input asp-for="ProjectName" class="form-control form-control-lg fs-6 rounded-3" placeholder="Enter project name..." />
                             <span asp-validation-for="ProjectName" class="text-danger small mt-1 d-block"></span>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label fw-semibold small"></label>
                             <textarea asp-for="Description" class="form-control rounded-3" rows="4" placeholder="Enter a brief description..."></textarea>
                             <span asp-validation-for="Description" class="text-danger small mt-1 d-block"></span>
                         </div>
 
-                        <div class="form-group mb-4">
-                            <label asp-for="Status" class="form-label fw-semibold"></label>
-                            <select asp-for="Status" class="form-select rounded-3"
+                        <!-- Status -->
+                        <div class="mb-4">
+                            <label asp-for="Status" class="form-label fw-semibold small"></label>
+                            <select asp-for="Status" class="form-select form-select-lg fs-6 rounded-3"
                                     asp-items="Html.GetEnumSelectList<Status>()"></select>
                             <span asp-validation-for="Status" class="text-danger small mt-1 d-block"></span>
                         </div>
 
-                        <!-- Actions -->
+                        <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                             <a asp-controller="Project" asp-action="Details" asp-route-id="@Model.ProjectId"
-                               class="btn btn-outline-secondary px-4 rounded-pill">Cancel</a>
-                            <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">Save changes</button>
+                               class="btn btn-light px-4 py-2 rounded-3 text-secondary fw-semibold border">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-semibold shadow-sm">Save changes</button>
                         </div>
                     </form>
-
                 </div>
             </div>
         </div>

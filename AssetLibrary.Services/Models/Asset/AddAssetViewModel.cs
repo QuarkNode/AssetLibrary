@@ -20,11 +20,11 @@
         public string AssetName { get; set; } = null!;
 
         [Display(Name = "Part Number")]
-        [StringLength(PartNumberMaxLength, MinimumLength = PartNumberMinLength,
+        [StringLength(AssetPartNumberMaxLength, MinimumLength = AssetPartNumberMinLength,
             ErrorMessage = "Part Number needs to be between {2} and {1} symbols")]
         public string? PartNumber { get; set; }
 
-        [MaxLength(AssetUploadDescriptionMaxLength, ErrorMessage = "Description is too long")]
+        [MaxLength(AssetDescriptionMaxLength, ErrorMessage = "Description is too long")]
         public string? Description { get; set; }
 
         [Display(Name = "Material")]
