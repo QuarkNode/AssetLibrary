@@ -122,6 +122,7 @@ Main entities: `User`, `Project`, `Asset`, `Revision`, `Material`.
 | Tags | Custom tag system for projects. | ❌ |
 | Search | Search field and filters for projects, assets and tags. | ❌ |
 | Content validation | Check file headers (magic bytes) on upload. | ❌ |
+| Re-vamped UI/UX | Better stylization for user experience and navigation. | :x: | 
 
 ## Author
 
