@@ -3,7 +3,6 @@
     public class ViewModelValidation
     {
         /* Asset Begin */
-
         public const int AssetNameMinLength = 1;
         public const int AssetNameMaxLength = 100;
 
@@ -47,11 +46,10 @@
 
         /* Home End */
 
-        /* AddRevision Begin */
+        /* Revision Begin */
+        public const int RevisionAddChangeNotesMaxLength = 150;
 
-        public const int ChangeNotesMaxLength = 150;
-
-        /* AddRevision End */
+        /* Revision End */
 
     }
 }
