@@ -1,9 +1,13 @@
 ﻿namespace AssetLibrary.Services.Models.Asset
 {
     using AssetLibrary.Services.Validation;
+
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc.Rendering;
+
     using System.ComponentModel.DataAnnotations;
+
+    using static AssetLibrary.Data.Common.CommonValidation;
     using static AssetLibrary.Data.Common.ViewModelValidation;
     public class UploadAssetViewModel : IValidatableObject
     {
@@ -29,7 +33,7 @@
 
         [Required(ErrorMessage = "Please pick a file")]
         [AllowedExtensions(".obj", ".stl", ".fbx")]
-        [MaxFileSize(75)]
+        [MaxFileSize(MaxFileSizeInMB)]
         public IFormFile File { get; set; } = null!;
         public bool IsNewProject { get; set; }
 

@@ -113,24 +113,37 @@ namespace AssetLibrary.Controllers
             return View(model);
         }
 
+        // URL: ~/Asset/ReplaceFile/{AssetId}
+        // Receives the ViewModel and POSTs the new file to replace the existing Asset file.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ReplaceFile(ReplaceAssetFileViewModel model)
+        public async Task<IActionResult> ReplaceFile(int id, ReplaceAssetFileViewModel model) // id = AssetId
         {
+            model.AssetId = id;
+
             if (!ModelState.IsValid)
             {
+                var form = await assetService.GetReplaceAssetFileViewModelAsync(id, User.GetRequiredUserId());
+
+                if (form == null)
+                {
+                    return NotFound();
+                }
+
+                model.AssetName = form.AssetName;
                 return View(model);
             }
 
-            bool success = await assetService.ReplaceCurrentRevisionFileAsync(model.AssetId, User.GetRequiredUserId(), model);
+            bool success = await assetService.ReplaceAssetFileAsync(id, User.GetRequiredUserId(), model);
 
             if (!success)
             {
                 return NotFound();
             }
 
-            TempData["SuccessMessage"] = "Asset file replaced successfully.";
-            return RedirectToAction("Details", new { id = model.AssetId });
+            TempData["SuccessMessage"] = "File replaced. Previous revisions were removed.";
+            return RedirectToAction("Details", new { id });
         }
 
         // URL: ~/Product/Details/
@@ -173,7 +186,7 @@ namespace AssetLibrary.Controllers
                 return NotFound();
             }
 
-            fileStorage.DeleteFile(filePath);   // after the DB commit, so a failure only leaves an orphan file
+            fileStorage.DeleteFile(filePath);
 
             TempData["SuccessMessage"] = "Revision deleted successfully.";
             return RedirectToAction("Details", new { id = revision.AssetId });
@@ -199,19 +212,21 @@ namespace AssetLibrary.Controllers
         public async Task<IActionResult> AddRevision(AddRevisionViewModel model)
         {
 
-            bool exists = await assetService.PopulateRevisionMetadataAsync(model, User.GetRequiredUserId());
-            if (!exists)
-            {
-                return NotFound();
-            }
-
             if (!ModelState.IsValid)
             {
+                var form = await assetService.GetAddRevisionViewModelAsync(model.AssetId, User.GetRequiredUserId());
+                if (form == null)
+                {
+                    return NotFound();
+                }
+
+                model.AssetName = form.AssetName;
+                model.ProjectId = form.ProjectId;
+                model.NextRevisionNumber = form.NextRevisionNumber;
                 return View(model);
             }
 
-            bool success = await assetService.CreateRevisionAsync(model, User.GetRequiredUserId());
-            if (!success)
+            if (!await assetService.CreateRevisionAsync(model, User.GetRequiredUserId()))
             {
                 return NotFound();
             }

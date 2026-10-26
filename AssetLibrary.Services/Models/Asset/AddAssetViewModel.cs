@@ -1,11 +1,14 @@
 ﻿namespace AssetLibrary.Services.Models.Asset
 {
     using AssetLibrary.Services.Validation;
+
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc.Rendering;
-    using System.ComponentModel.DataAnnotations;
-    using static AssetLibrary.Data.Common.ViewModelValidation;
 
+    using System.ComponentModel.DataAnnotations;
+
+    using static AssetLibrary.Data.Common.CommonValidation;
+    using static AssetLibrary.Data.Common.ViewModelValidation;
     public class AddAssetViewModel
     {
         public int ProjectId { get; set; }
@@ -32,7 +35,7 @@
 
         [Required(ErrorMessage = "Please pick a file")]
         [AllowedExtensions(".obj", ".stl", ".fbx")]
-        [MaxFileSize(75)]
+        [MaxFileSize(MaxFileSizeInMB)]
         public IFormFile File { get; set; } = null!;
         public IEnumerable<SelectListItem>? Materials { get; set; }
 

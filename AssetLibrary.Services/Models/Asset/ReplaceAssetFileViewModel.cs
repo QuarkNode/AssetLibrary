@@ -1,8 +1,12 @@
 ﻿namespace AssetLibrary.Services.Models.Asset
 {
     using AssetLibrary.Services.Validation;
+
     using Microsoft.AspNetCore.Http;
+
     using System.ComponentModel.DataAnnotations;
+
+    using static AssetLibrary.Data.Common.CommonValidation;
     public class ReplaceAssetFileViewModel
     {
         [Required]
@@ -13,7 +17,7 @@
 
         [Required(ErrorMessage = "Please select a replacement file.")]
         [AllowedExtensions(".obj", ".stl", ".fbx")]
-        [MaxFileSize(75)]
+        [MaxFileSize(MaxFileSizeInMB)]
         public IFormFile File { get; set; } = null!;
 
 

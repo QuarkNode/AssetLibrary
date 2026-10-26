@@ -102,72 +102,81 @@
 
         public async Task<AddRevisionViewModel?> GetAddRevisionViewModelAsync(int assetId, int userId)
         {
-            var asset = await dbContext.Assets
-                .AsNoTracking()
-                .Where(a => a.AssetId == assetId && a.OwnerId == userId && !a.IsDeleted)
-                .Select(a => new
-                {
-                    a.ProjectId,
-                    a.AssetName,
-                    NextRevisionNumber = a.Revisions.Count() + 1
-                })
-                .FirstOrDefaultAsync();
 
-            if (asset == null)
-            {
-                return null;
-            }
-
-            return new AddRevisionViewModel
-            {
-                AssetId = assetId,
-                ProjectId = asset.ProjectId,
-                AssetName = asset.AssetName,
-                NextRevisionNumber = asset.NextRevisionNumber
-            };
-        }
-
-        public async Task<bool> PopulateRevisionMetadataAsync(AddRevisionViewModel model, int userId)
-        {
-            var asset = await dbContext.Assets
-                .AsNoTracking()
-                .Where(a => a.AssetId == model.AssetId && a.OwnerId == userId && !a.IsDeleted)
-                .Select(a => new { a.AssetName, a.ProjectId })
-                .FirstOrDefaultAsync();
-
-            if (asset == null)
-            {
-                return false;
-            }
-
-            model.AssetName = asset.AssetName;
-            model.ProjectId = asset.ProjectId;
-            model.NextRevisionNumber = await GetNextRevisionNumberAsync(model.AssetId);
-
-            return true;
+            return await dbContext.Assets
+                 .AsNoTracking()
+                 .Where(a => a.AssetId == assetId && a.OwnerId == userId && !a.IsDeleted)
+                 .Select(a => new AddRevisionViewModel
+                 {
+                     AssetId = a.AssetId,
+                     ProjectId = a.ProjectId,
+                     AssetName = a.AssetName,
+                     NextRevisionNumber = (a.Revisions.Max(r => (int?)r.RevisionNumber) ?? 0) + 1
+                 })
+                 .FirstOrDefaultAsync();
         }
 
         public async Task<bool> CreateRevisionAsync(AddRevisionViewModel model, int userId)
         {
-            var asset = await CreateAsset(model, userId);
+            //var asset = await CreateAsset(model, userId);
+
+            //if (asset == null)
+            //{
+            //    return false;
+            //}
+
+            //string subFolder = Path.Combine("assets", asset.AssetId.ToString()); // <---
+            //string relativePath = await fileStorageService.SaveAsync(model.File, subFolder); // <--- 
+            //string extension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
+
+            //Revision revision = new()
+            //{
+            //    AssetId = asset.AssetId,
+            //    FilePath = relativePath,
+            //    FileExtension = extension,
+            //    OriginalFileName = Path.GetFileName(model.File.FileName),
+            //    FileSizeBytes = model.File.Length,
+            //    RevisionNumber = model.NextRevisionNumber,
+            //    UploadedByUserId = userId,
+            //    UploadedOn = DateTime.UtcNow,
+            //    ChangeNotes = model.ChangeNotes
+            //};
+
+            //dbContext.Revisions.Add(revision);
+            //asset.CurrentRevision = revision;
+            //asset.UpdatedOn = DateTime.UtcNow;
+            //try
+            //{
+            //    await dbContext.SaveChangesAsync();
+            //    return true;
+            //}
+            //catch
+            //{
+            //    fileStorageService.DeleteFile(relativePath);
+            //    throw;
+            //}
+
+            var asset = await dbContext.Assets
+                .FirstOrDefaultAsync(a => a.AssetId == model.AssetId && a.OwnerId == userId && !a.IsDeleted);
 
             if (asset == null)
             {
                 return false;
             }
 
-            string subFolder = Path.Combine("assets", asset.AssetId.ToString()); // <---
-            string relativePath = await fileStorageService.SaveAsync(model.File, subFolder); // <--- 
-            string extension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
+            // Don't trust the number from the form; compute it here
+            int nextNumber = await GetNextRevisionNumberAsync(asset.AssetId);
 
-            Revision revision = new()
+            string relativePath = await fileStorageService.SaveAsync(model.File, $"assets/{asset.AssetId}");
+
+            var revision = new Revision
             {
                 AssetId = asset.AssetId,
                 FilePath = relativePath,
-                FileExtension = extension,
+                FileExtension = Path.GetExtension(model.File.FileName).ToLowerInvariant(),
                 OriginalFileName = Path.GetFileName(model.File.FileName),
                 FileSizeBytes = model.File.Length,
-                RevisionNumber = model.NextRevisionNumber,
+                RevisionNumber = nextNumber,
                 UploadedByUserId = userId,
                 UploadedOn = DateTime.UtcNow,
                 ChangeNotes = model.ChangeNotes
@@ -176,6 +185,7 @@
             dbContext.Revisions.Add(revision);
             asset.CurrentRevision = revision;
             asset.UpdatedOn = DateTime.UtcNow;
+
             try
             {
                 await dbContext.SaveChangesAsync();
@@ -301,46 +311,45 @@
 
             return result;
         }
-        public async Task<bool> ReplaceCurrentRevisionFileAsync(int assetId, int userId, ReplaceAssetFileViewModel model)
+        public async Task<bool> ReplaceAssetFileAsync(int assetId, int userId, ReplaceAssetFileViewModel model)
         {
             var asset = await dbContext.Assets
-                .Include(a => a.CurrentRevision)
+                .Include(a => a.Revisions)
                 .FirstOrDefaultAsync(a => a.AssetId == assetId && a.OwnerId == userId && !a.IsDeleted);
 
-            if (asset == null && asset.CurrentRevision == null)
+            if (asset == null)
             {
                 return false;
             }
 
-            string oldFilePath = asset.CurrentRevision.FilePath;
-            string newFilePath;
+            var oldFilePaths = asset.Revisions.Select(r => r.FilePath).ToList();
+            string newFilePath = await fileStorageService.SaveAsync(model.File, $"assets/{asset.AssetId}");
 
             try
             {
-                string subFolder = $"assets/{asset.AssetId}";
-                newFilePath = await fileStorageService.SaveAsync(model.File, subFolder);
-            }
-            catch
-            {
+                // Clear the pointer first so the old revisions can be removed
+                asset.CurrentRevisionId = null;
+                await dbContext.SaveChangesAsync();
 
-                throw;
-            }
+                dbContext.Revisions.RemoveRange(asset.Revisions);
 
-            var revision = asset.CurrentRevision;
-            revision.FilePath = newFilePath;
-            revision.FileExtension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
-            revision.OriginalFileName = model.File.FileName;
-            revision.FileSizeBytes = model.File.Length;
+                var revision = new Revision
+                {
+                    AssetId = asset.AssetId,
+                    FilePath = newFilePath,
+                    FileExtension = Path.GetExtension(model.File.FileName).ToLowerInvariant(),
+                    OriginalFileName = Path.GetFileName(model.File.FileName),
+                    FileSizeBytes = model.File.Length,
+                    RevisionNumber = 1,
+                    UploadedByUserId = userId,
+                    UploadedOn = DateTime.UtcNow,
+                    ChangeNotes = "Initial revision [File Replaced]"
+                };
 
-            asset.UpdatedOn = DateTime.UtcNow;
+                dbContext.Revisions.Add(revision);
+                asset.CurrentRevision = revision;
+                asset.UpdatedOn = DateTime.UtcNow;
 
-            var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd");
-            revision.ChangeNotes = string.IsNullOrWhiteSpace(revision.ChangeNotes)
-                ? $"File repalced {timestamp}"
-                : $"{revision.ChangeNotes}\nFile replaced on {timestamp}";
-
-            try
-            {
                 await dbContext.SaveChangesAsync();
             }
             catch
@@ -349,9 +358,9 @@
                 throw;
             }
 
-            if (!string.IsNullOrWhiteSpace(oldFilePath))
+            foreach (var path in oldFilePaths)
             {
-                fileStorageService.DeleteFile(oldFilePath);
+                fileStorageService.DeleteFile(path);
             }
 
             return true;
@@ -384,10 +393,12 @@
 
             foreach (var path in filePaths)
             {
-                if (!string.IsNullOrEmpty(path) && File.Exists(path))
-                {
-                    File.Delete(path);
-                }
+                //if (!string.IsNullOrEmpty(path) && File.Exists(path))
+                //{
+                //    File.Delete(path);
+                //}
+
+                fileStorageService.DeleteFile(path);
             }
 
             return true;
@@ -401,11 +412,6 @@
                 .MaxAsync(r => (int?)r.RevisionNumber);
 
             return (max ?? 0) + 1;
-        }
-        private async Task<Asset?> CreateAsset(AddRevisionViewModel model, int userId)
-        {
-            return await dbContext.Assets
-                            .FirstOrDefaultAsync(a => a.AssetId == model.AssetId && a.OwnerId == userId && !a.IsDeleted);
         }
     }
 }

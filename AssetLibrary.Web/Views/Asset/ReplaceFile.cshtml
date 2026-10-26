@@ -1,51 +1,30 @@
 ﻿@model ReplaceAssetFileViewModel
 
 @{
-    ViewData["Title"] = "Replace Asset File";
+    ViewData["Title"] = "Replace file";
 }
 
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Replace File for Asset</h4>
-                </div>
-                <div class="card-body">
-                    <form asp-action="ReplaceFile" method="post" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="container py-5" style="max-width: 640px;">
+    <h1 class="h3 fw-bold mb-1">Replace file</h1>
+    <p class="text-muted">Asset: <strong>@Model.AssetName</strong></p>
 
-                        <!-- Hidden Asset ID -->
-                        <input type="hidden" asp-for="AssetId" />
-
-                        <!-- Readonly Asset Name for clarity -->
-                        <div class="mb-3">
-                            <label asp-for="AssetName" class="form-label font-weight-bold"></label>
-                            <input asp-for="AssetName" class="form-control bg-light" disabled />
-                        </div>
-
-                        <!-- File Input -->
-                        <div class="mb-3">
-                            <label asp-for="File" class="form-label">New Replacement File</label>
-                            <input asp-for="File" class="form-control" type="file" />
-                            <span asp-validation-for="File" class="text-danger"></span>
-                            <div class="form-text text-muted">Allowed formats: .obj, .stl, .fbx</div>
-                        </div>
-
-                        <!-- Form Actions -->
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <a asp-action="Details" asp-route-id="@Model.AssetId" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Confirm Replacement</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <div class="alert alert-warning">
+        This removes <strong>all existing revisions</strong> of this asset and starts over at Rev 1 with the new file.
+        To keep history, use <em>Upload New Revision</em> on the asset page instead.
     </div>
-</div>
 
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
+    <form asp-controller="Asset" asp-action="ReplaceFile" asp-route-id="@Model.AssetId"
+          method="post" enctype="multipart/form-data"
+          onsubmit="return confirm('Replace the file and delete all previous revisions? This cannot be undone.');">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="File" class="form-label">New file</label>
+            <input asp-for="File" type="file" class="form-control" accept=".obj,.stl,.fbx" />
+            <span asp-validation-for="File" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-danger">Replace file</button>
+        <a asp-action="Details" asp-route-id="@Model.AssetId" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>
