@@ -16,6 +16,9 @@ namespace AssetLibrary.Controllers
             this.trashService = trashService;
         }
 
+        // URL: ~/Trash/Index
+        // Returns a view of the Trash page with a list of deleted Projects for the logged-in user.
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -24,8 +27,11 @@ namespace AssetLibrary.Controllers
             return View(projects);
         }
 
+        // URL: ~/Trash/Details/id
+        // Returns a view of a deleted Project with its information.
+
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id) // id = ProjectId
         {
             var project = await trashService.GetDeletedProjectDetailsAsync(id);
 

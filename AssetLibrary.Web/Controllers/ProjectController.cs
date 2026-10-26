@@ -17,6 +17,10 @@
             this.projectService = projectService;
         }
 
+
+        // URL: ~/Project/Details/id
+        // Returns a view of a Project with its information.
+
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
@@ -30,7 +34,9 @@
             return View(project);
         }
 
+        // URL: ~/Project/Delete/id
         // Soft deletes a Project. Preserves the Project in DB for accidental deletion or unsure confirmations.
+
         [HttpPost]
         public async Task<IActionResult> Delete(int id) // id = ProjectId
         {
@@ -45,6 +51,8 @@
         }
 
         // URL: ~/Project/Edit/id
+        // Returns a view of a form to edit a Project's information.
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id) // id = ProjectId
         {
@@ -78,6 +86,7 @@
 
         // URL: ~/Project/Upload
         // Returns a view of a list form where User can create/upload an Asset and Project.
+
         [HttpGet]
         public async Task<IActionResult> Upload()
         {
@@ -113,6 +122,9 @@
                 return View(viewModel);
             }
         }
+
+        // URL: ~/Project/Add/{ProjectId}
+        // Returns a view of a form where User can upload an Asset to an existing Project.
 
         [HttpGet]
         public async Task<IActionResult> Add(int id)

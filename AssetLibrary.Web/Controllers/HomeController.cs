@@ -1,9 +1,9 @@
 namespace AssetLibrary.Controllers
 {
+    using AssetLibrary.Extensions;
     using AssetLibrary.Services.Contracts;
-    using Microsoft.AspNetCore.Mvc;
 
-    using System.Security.Claims;
+    using Microsoft.AspNetCore.Mvc;
 
     public class HomeController : Controller
     {
@@ -13,23 +13,15 @@ namespace AssetLibrary.Controllers
             this.homeService = homeService;
         }
 
+        // URL: ~/Home/Index
+        // Returns a view of the Home page with a list of Projects for the logged-in user.
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            int? userId = GetUserId();
-            var viewModel = await homeService.GetHomeViewModelAsync(userId);
+            var viewModel = await homeService.GetHomeViewModelAsync(User.GetRequiredUserId());
 
             return View(viewModel);
-        }
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        // Method
-        private int? GetUserId()
-        {
-            return int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) ? userId : null;
         }
     }
 
