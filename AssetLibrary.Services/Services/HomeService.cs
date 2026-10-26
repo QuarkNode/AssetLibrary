@@ -1,9 +1,11 @@
 ﻿namespace AssetLibrary.Services.Services
 {
     using AssetLibrary.Data;
+
     using AssetLibrary.Services.Contracts;
     using AssetLibrary.Services.Models.Home;
     using AssetLibrary.Services.Models.Project;
+
     using Microsoft.EntityFrameworkCore;
 
     public class HomeService : IHomeService

@@ -19,7 +19,7 @@ namespace AssetLibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var viewModel = await homeService.GetHomeViewModelAsync(User.GetRequiredUserId());
+            var viewModel = await homeService.GetHomeViewModelAsync(User.GetUserId());
 
             return View(viewModel);
         }
