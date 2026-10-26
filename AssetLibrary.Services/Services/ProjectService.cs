@@ -94,11 +94,6 @@
 
         public async Task ProcessAssetUploadViewModelAsync(AddAssetViewModel model, int userId)
         {
-            //int count = await dbContext.Projects
-            //    .AsNoTracking()
-            //    .CountAsync(P => P.OwnerId == userId && !P.IsDeleted);
-
-
             Asset asset = new Asset
             {
                 ProjectId = model.ProjectId,

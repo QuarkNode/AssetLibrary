@@ -19,13 +19,11 @@
         {
             var viewModel = new HomeViewModel();
 
-            // If the user is not logged in, return the default guest view model
             if (!userId.HasValue)
             {
                 return viewModel;
             }
 
-            // If logged in, populate user-specific dashboard data
             viewModel.IsLoggedIn = true;
 
             viewModel.Projects = await dbContext.Projects

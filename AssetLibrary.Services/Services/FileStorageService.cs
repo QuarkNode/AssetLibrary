@@ -45,8 +45,6 @@
         public string? GetPhysicalPath(string relativePath)
         {
 
-            // NOTE: There's a bug when there's a last object and doesn't include the /uploads/assets/ subfolder ...
-
             if (string.IsNullOrWhiteSpace(relativePath))
             {
                 return null;
@@ -62,15 +60,6 @@
             }
 
             return fullpath;
-
-            //if (string.IsNullOrWhiteSpace(relativePath))
-            //{
-            //    return null;
-            //}
-
-            //string trimmedPath = relativePath.TrimStart('/', '\\');
-
-            //return Path.Combine(webHostEnvironment.WebRootPath, "uploads", "assets", trimmedPath);
         }
 
         public async Task<string> SaveAsync(IFormFile file, string subFolder)
