@@ -3,11 +3,8 @@ using AssetLibrary.Services.Models.Project;
 
 namespace AssetLibrary.Services.Contracts
 {
-    /* Description: Project queries (user's list, details, dropdown options), creating projects; Never touches files or HttpContext. */
-
     public interface IProjectService
     {
-        // Methods the controller currently uses
         Task<ProjectDetailsViewModel?> GetDetailsAsync(int projectId);
 
         Task<UploadAssetViewModel> GetAssetUploadViewModelAsync();
