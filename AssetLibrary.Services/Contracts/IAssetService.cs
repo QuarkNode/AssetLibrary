@@ -12,7 +12,8 @@
         // Read
 
         public Task<Asset?> GetAssetDetailsAsync(int assetId);
-        public Task<RevisionFileDto?> GetRevisionFileAsync(int revisionId, int userId);
+        public Task<Asset?> GetAssetDetailsAsync(int assetId, int userId);
+        public Task<RevisionFileViewModel?> GetRevisionFileAsync(int revisionId, int userId);
         public Task<AddRevisionViewModel?> GetAddRevisionViewModelAsync(int assetId, int userId);
         public Task<bool> PopulateRevisionMetadataAsync(AddRevisionViewModel model, int userId);
         public Task<bool> CreateRevisionAsync(AddRevisionViewModel model, int userId);
@@ -22,5 +23,7 @@
         public Task<IEnumerable<SelectListItem>> GetProjectsAsync();
         public Task<ReplaceAssetFileViewModel?> GetReplaceAssetFileViewModelAsync(int assetId, int userId);
         public Task<bool> ReplaceCurrentRevisionFileAsync(int assetId, int userId, ReplaceAssetFileViewModel model);
+        public Task<bool> DeleteAssetPermanently(Asset asset);
+        public Task<string?> DeleteRevisionAsync(int revisionId, int userId);
     }
 }

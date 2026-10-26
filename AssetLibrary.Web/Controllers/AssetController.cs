@@ -21,8 +21,9 @@ namespace AssetLibrary.Controllers
 
         // URL: ~/Project/Details/id
         // Returns a view of an Asset with its information.
+
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id) // id = Asset Id
         {
 
             var asset = await assetService.GetAssetDetailsAsync(id);
@@ -60,6 +61,8 @@ namespace AssetLibrary.Controllers
         }
 
         // URL: ~/Project/Details/{ProjectId}
+        // Gets the EditForm view.
+
         [HttpGet]
         public async Task<IActionResult> Edit(int id) // id = Asset Id
         {
@@ -73,6 +76,9 @@ namespace AssetLibrary.Controllers
             return View(model);
 
         }
+
+        // URL: ~/Project/Details/{ProjectId}
+        // Receives the ViewModel and POSTs the new update to Asset.
 
         [HttpPost]
         public async Task<IActionResult> Edit(EditAssetViewModel model)
@@ -127,8 +133,54 @@ namespace AssetLibrary.Controllers
             return RedirectToAction("Details", new { id = model.AssetId });
         }
 
+        // URL: ~/Product/Details/
+        // Deletes an Asset permanently.
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var asset = await assetService.GetAssetDetailsAsync(id, User.GetRequiredUserId());
+
+            if (asset == null)
+            {
+                return NotFound();
+            }
+
+            bool success = await assetService.DeleteAssetPermanently(asset);
+
+            if (!success)
+            {
+                return NotFound();
+            }
+
+            TempData["SuccessMessage"] = "Asset file deleted successfully.";
+            return RedirectToAction("Details", "Project", new { id = asset.ProjectId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRevision(int id)
+        {
+            var revision = await assetService.GetRevisionFileAsync(id, User.GetRequiredUserId());
+            if (revision == null)
+            {
+                return NotFound();
+            }
+
+            string? filePath = await assetService.DeleteRevisionAsync(id, User.GetRequiredUserId());
+            if (filePath == null)
+            {
+                return NotFound();
+            }
+
+            fileStorage.DeleteFile(filePath);   // after the DB commit, so a failure only leaves an orphan file
+
+            TempData["SuccessMessage"] = "Revision deleted successfully.";
+            return RedirectToAction("Details", new { id = revision.AssetId });
+        }
+
         // URL: ~/Asset/Details/Id
-        // Adds an updated Revision of Asset to hisotry.
+        // Adds an updated Revision of Asset to history.
 
         [HttpGet]
         public async Task<IActionResult> AddRevision(int id)

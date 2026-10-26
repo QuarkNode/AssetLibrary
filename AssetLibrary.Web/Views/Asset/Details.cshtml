@@ -10,7 +10,7 @@
 }
 
 <div class="container py-5">
-    
+
     <!-- Breadcrumb Navigation -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 small text-muted">
@@ -30,16 +30,16 @@
     <!-- Main Header Card -->
     <div class="card shadow-sm border-0 rounded-4 p-4 p-md-5 mb-4 bg-white">
         <div class="row align-items-center g-4">
-            
+
             <!-- Asset Info / Title -->
             <div class="col-lg-8">
                 <div class="d-flex align-items-center gap-2 mb-2">
                     <span class="badge bg-secondary bg-opacity-10 text-secondary font-monospace px-2.5 py-1 rounded-2 small">@Model.PartNumber</span>
                     <span class="status-pill status-@Model.Status.ToString().ToLower() px-2.5 py-1 rounded-pill small fw-semibold">@Model.Status</span>
                 </div>
-                
+
                 <h1 class="h2 fw-bold text-dark mb-2">@Model.AssetName</h1>
-                
+
                 @if (!string.IsNullOrWhiteSpace(Model.Description))
                 {
                     <p class="text-muted mb-4">@Model.Description</p>
@@ -66,7 +66,7 @@
 
     <!-- Revision History Card -->
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden bg-white">
-        
+
         <!-- Card Header Bar -->
         <div class="card-header bg-transparent border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
             <div>
@@ -99,16 +99,28 @@
                         <tbody>
                             @foreach (var rev in orderedRevisions)
                             {
-                                <tr class="@(Model.CurrentRevisionId == rev.RevisionId ? "table-light fw-medium" : "") border-bottom">
+                                bool isCurrent = Model.CurrentRevisionId == rev.RevisionId;
+
+                                <tr class="rev-row @(isCurrent ? "is-current table-light fw-medium" : "") border-bottom">
                                     <td class="ps-3 font-monospace fw-bold text-primary">@(rev.RevisionNumber)</td>
                                     <td class="text-muted small font-monospace">@rev.UploadedOn.ToString("MMM d, yyyy h:mm tt")</td>
                                     <td>@rev.UploadedByUser?.FirstName @rev.UploadedByUser?.LastName</td>
                                     <td class="text-muted small font-monospace">@((rev.FileSizeBytes / 1024.0).ToString("0.#")) KB</td>
                                     <td class="text-muted">@(string.IsNullOrEmpty(rev.ChangeNotes) ? "—" : rev.ChangeNotes)</td>
                                     <td class="text-end pe-3">
-                                        <a class="btn btn-sm btn-outline-secondary px-3 rounded-pill fw-semibold shadow-sm" asp-controller="Asset" asp-action="DownloadRevision" asp-route-id="@rev.RevisionId">
-                                            <i class="bi bi-download me-1"></i> Download
-                                        </a>
+                                        <div class="rev-actions d-inline-flex gap-2">
+                                            <a class="btn btn-sm btn-outline-secondary px-3 rounded-pill fw-semibold shadow-sm"
+                                               asp-controller="Asset" asp-action="DownloadRevision" asp-route-id="@rev.RevisionId">
+                                                <i class="bi bi-download me-1"></i> Download
+                                            </a>
+
+                                            <form asp-controller="Asset" asp-action="DeleteRevision" asp-route-id="@rev.RevisionId" method="post"
+                                                  onsubmit="return confirm('Delete revision @rev.RevisionNumber permanently?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-semibold shadow-sm">
+                                                    <i class="bi bi-trash me-1"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }

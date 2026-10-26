@@ -1,65 +1,4 @@
-﻿.ad-wrap {
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
-    color: #2A2E33;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
-}
-
-.ad-back {
-    display: inline-block;
-    font-size: 0.85rem;
-    color: #8A8578;
-    text-decoration: none;
-    margin-bottom: 1.5rem;
-}
-
-    .ad-back:hover {
-        color: #C9612D;
-    }
-
-.ad-header {
-    border-bottom: 1px solid #D8D4CB;
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.ad-eyebrow {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    color: #8A8578;
-    margin: 0 0 0.4rem;
-}
-
-.ad-title {
-    font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
-    font-size: 2rem;
-    font-weight: 600;
-    margin: 0 0 0.5rem;
-    color: #1C1E21;
-}
-
-.ad-desc {
-    max-width: 62ch;
-    color: #5B5749;
-    line-height: 1.55;
-    margin: 0 0 1rem;
-}
-
-.ad-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    font-size: 0.9rem;
-    color: #6B6656;
-    margin-bottom: 1rem;
-}
-
-    .ad-meta strong {
-        color: #2A2E33;
-        font-weight: 600;
-    }
-
+﻿/* ---------- Status pills (used in the header) ---------- */
 .status-pill {
     display: inline-block;
     font-family: 'IBM Plex Mono', monospace;
@@ -88,117 +27,25 @@
     border-color: #BEDCC0;
 }
 
-.ad-checkedout {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    color: #B4622A;
-    background: #FCEEDF;
-    border: 1px solid #F0C79A;
-    padding: 0.4rem 0.75rem;
-    border-radius: 6px;
+/* ---------- Revision rows: actions hidden until hover ---------- */
+.rev-actions {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
 }
 
-.ad-actions {
-    margin-top: 0.5rem;
+/* Visible on row hover, keyboard focus inside the row, or for the current revision */
+.rev-row:hover .rev-actions,
+.rev-row:focus-within .rev-actions,
+.rev-row.is-current .rev-actions {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.ad-btn {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    border: none;
-    padding: 0.55rem 1.1rem;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.ad-btn-primary {
-    background: #C9612D;
-    color: #fff;
-}
-
-    .ad-btn-primary:hover {
-        background: #B0521F;
+/* Touch devices have no hover, so always show the buttons */
+@media (hover: none) {
+    .rev-actions {
+        opacity: 1;
+        pointer-events: auto;
     }
-
-.ad-section {
-    margin-top: 2rem;
-}
-
-.ad-section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 0.9rem;
-}
-
-.ad-section-title {
-    font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin: 0;
-    color: #1C1E21;
-}
-
-.ad-current-tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.75rem;
-    color: #3F7A47;
-    background: #E7F1E7;
-    border: 1px solid #BEDCC0;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
-}
-
-.ad-revision-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.88rem;
-}
-
-    .ad-revision-table th {
-        text-align: left;
-        font-family: 'IBM Plex Mono', monospace;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        color: #8A8578;
-        border-bottom: 1px solid #D8D4CB;
-        padding: 0.5rem 0.6rem;
-    }
-
-    .ad-revision-table td {
-        padding: 0.6rem;
-        border-bottom: 1px solid #EEEAE0;
-        color: #2A2E33;
-    }
-
-.ad-row-current {
-    background: #FBF6ED;
-}
-
-.ad-mono {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.82rem;
-    color: #5B5749;
-}
-
-.ad-download {
-    color: #C9612D;
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 0.85rem;
-}
-
-    .ad-download:hover {
-        text-decoration: underline;
-    }
-
-.ad-empty {
-    border: 1px dashed #D8D4CB;
-    border-radius: 8px;
-    padding: 2rem 1.5rem;
-    text-align: center;
-    color: #8A8578;
 }

@@ -49,7 +49,7 @@
                             AssetName = a.AssetName,
                             Status = a.Status,
                             MaterialName = a.Material.MaterialName,
-                            CurrentRevisionNumber = a.CurrentRevision != null ? a.CurrentRevision.RevisionNumber.ToString() : string.Empty,
+                            CurrentRevisionNumber = a.CurrentRevision.RevisionNumber,
                             IsDeleted = false
                         })
                         .ToList()

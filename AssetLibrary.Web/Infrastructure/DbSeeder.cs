@@ -61,6 +61,9 @@ public static class DbSeeder
         context.Projects.Add(project);
         await context.SaveChangesAsync();
 
+        string root = env.WebRootPath;
+
+
         var seedDir = Path.Combine(env.ContentRootPath, "SeedData", "Models");
         var uploadsDir = Path.Combine(env.WebRootPath, "uploads", "assets");
         Directory.CreateDirectory(uploadsDir);
@@ -81,8 +84,6 @@ public static class DbSeeder
             number++;
 
             var storedName = $"{Guid.NewGuid()}{extension}";
-            File.Copy(file, Path.Combine(uploadsDir, storedName));
-
 
             var asset = new Asset
             {
@@ -99,10 +100,14 @@ public static class DbSeeder
             context.Assets.Add(asset);
             await context.SaveChangesAsync();
 
+            var assetDir = Path.Combine(uploadsDir, asset.AssetId.ToString());
+            Directory.CreateDirectory(assetDir);
+            File.Copy(file, Path.Combine(assetDir, storedName));
+
             var revision = new Revision
             {
                 AssetId = asset.AssetId,
-                FilePath = storedName,
+                FilePath = $"/uploads/assets/{asset.AssetId}/{storedName}",
                 FileExtension = extension,
                 FileSizeBytes = new FileInfo(file).Length,
                 OriginalFileName = Path.GetFileName(file),

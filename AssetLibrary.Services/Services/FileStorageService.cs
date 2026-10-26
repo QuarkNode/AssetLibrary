@@ -14,19 +14,19 @@
             this.webHostEnvironment = webHostEnvironment;
             this.logger = logger;
         }
-        public async Task<bool> DeleteFile(string relativePath)
+        public bool DeleteFile(string relativePath)
         {
             string? physicalPath = GetPhysicalPath(relativePath);
 
             if (physicalPath == null)
             {
                 logger.LogWarning($"Skipped deleting file, invalid path: {relativePath}");
-                return await Task.FromResult(false);
+                return false;
             }
 
             if (!File.Exists(physicalPath))
             {
-                return await Task.FromResult(false);
+                return true;
             }
 
             try
@@ -36,27 +36,41 @@
             catch (Exception ex)
             {
                 logger.LogWarning(ex, $"Could not delete file {physicalPath}");
-                return await Task.FromResult(false);
+                return false;
             }
 
             return true;
-
-            //if (physicalPath != null && File.Exists(physicalPath))
-            //{
-            //    File.Delete(physicalPath);
-            //}
         }
 
         public string? GetPhysicalPath(string relativePath)
         {
+
+            // NOTE: There's a bug when there's a last object and doesn't include the /uploads/assets/ subfolder ...
+
             if (string.IsNullOrWhiteSpace(relativePath))
             {
                 return null;
             }
 
+            string root = Path.GetFullPath(webHostEnvironment.WebRootPath);
             string trimmedPath = relativePath.TrimStart('/', '\\');
+            string fullpath = Path.GetFullPath(Path.Combine(root, trimmedPath));
 
-            return Path.Combine(webHostEnvironment.WebRootPath, "uploads", "assets", trimmedPath);
+            if (!fullpath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                return null;
+            }
+
+            return fullpath;
+
+            //if (string.IsNullOrWhiteSpace(relativePath))
+            //{
+            //    return null;
+            //}
+
+            //string trimmedPath = relativePath.TrimStart('/', '\\');
+
+            //return Path.Combine(webHostEnvironment.WebRootPath, "uploads", "assets", trimmedPath);
         }
 
         public async Task<string> SaveAsync(IFormFile file, string subFolder)

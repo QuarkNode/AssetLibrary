@@ -17,6 +17,7 @@
         [MaxLength(150, ErrorMessage = "Too long description.")]
         public string? Description { get; set; }
         public int? MaterialId { get; set; }
+        public DateTime UpdatedOn { get; set; }
         public IEnumerable<SelectListItem>? Materials { get; set; }
         public int ProjectId { get; set; }
         public IEnumerable<SelectListItem>? Projects { get; set; }

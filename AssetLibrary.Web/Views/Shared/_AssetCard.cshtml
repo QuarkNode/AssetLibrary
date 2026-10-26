@@ -1,14 +1,13 @@
 ﻿@model AssetCardViewModel
 
-<div class="asset-card" onclick="if(!event.target.closest('.dropdown')) location.href='@Url.Action("Details", "Asset", new { id = Model.AssetId })';">
+<div class="asset-card position-relative">
     <div class="asset-card-top">
         <span class="asset-part-no">@Model.PartNumber</span>
 
         <div class="d-flex align-items-center gap-2">
             <span class="status-pill status-@Model.Status.ToString().ToLower()">@Model.Status</span>
 
-            <!-- Dropdown Menu -->
-            <div class="dropdown">
+            <div class="dropdown position-relative z-2">
                 <button class="dropdown-toggle-btn"
                         type="button"
                         data-bs-toggle="dropdown"
@@ -18,29 +17,31 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="@Url.Action("Edit", "Asset", new { id = Model.AssetId })">
+                        <a class="dropdown-item" asp-controller="Asset" asp-action="Edit" asp-route-id="@Model.AssetId">
                             Edit Details
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="@Url.Action("ReplaceFile", "Asset", new { id = Model.AssetId })">
+                        <a class="dropdown-item" asp-controller="Asset" asp-action="ReplaceFile" asp-route-id="@Model.AssetId">
                             Upload New Version
                         </a>
                     </li>
                     <li><hr class="dropdown-divider my-1"></li>
                     <li>
-                        <button class="dropdown-item text-danger"
-                                type="button"
-                                onclick="confirmDelete(@Model.AssetId, '@Model.AssetName')">
-                            Delete Asset
-                        </button>
+                        <form asp-controller="Asset" asp-action="Delete" asp-route-id="@Model.AssetId" method="post"
+                              onsubmit="return confirm('Delete this asset permanently? This cannot be undone.');">
+                            <button type="submit" class="dropdown-item text-danger">Delete Asset</button>
+                        </form>
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <p class="asset-name">@Model.AssetName</p>
+    <p class="asset-name">
+        <a class="stretched-link text-decoration-none text-reset"
+           asp-controller="Asset" asp-action="Details" asp-route-id="@Model.AssetId">@Model.AssetName</a>
+    </p>
     <span class="asset-material">@(Model.MaterialName ?? "No material set")</span>
 
     <div class="asset-foot">

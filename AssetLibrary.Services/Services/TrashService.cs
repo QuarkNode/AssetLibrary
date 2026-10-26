@@ -49,7 +49,7 @@
                     AssetName = a.AssetName,
                     Status = a.Status,
                     IsDeleted = true,
-                    CurrentRevisionNumber = a.CurrentRevision?.RevisionNumber.ToString(),
+                    CurrentRevisionNumber = a.CurrentRevision.RevisionNumber,
                     RevisionCount = a.Revisions?.Count ?? 0,
                     PartNumber = a.PartNumber,
                     MaterialName = a.Material?.MaterialName
@@ -138,7 +138,7 @@
 
             foreach (var path in filePaths)
             {
-                await fileStorageService.DeleteFile(path);
+                fileStorageService.DeleteFile(path);
             }
 
             return true;
