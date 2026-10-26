@@ -2,25 +2,29 @@
 {
     using Microsoft.AspNetCore.Http;
     using System.ComponentModel.DataAnnotations;
+
     public class AllowedExtensionsAttribute : ValidationAttribute
     {
-        private readonly string[] extensions;
+        private readonly string[] allowedExtensions;
 
-        public AllowedExtensionsAttribute(params string[] extension)
+        public AllowedExtensionsAttribute(params string[] extensions)
         {
-            this.extensions = extension;
+            this.allowedExtensions = extensions;
         }
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value is IFormFile file)
             {
-                var extensions = Path.GetExtension(file.FileName).ToLowerInvariant();
-                if (!this.extensions.Contains(extensions))
+                string uploadedExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(uploadedExtension))
                 {
-                    return new ValidationResult($"Only these formats are supported: {string.Join(", ", extensions)}");
+                    return new ValidationResult(
+                        $"Only these formats are supported: {string.Join(", ", allowedExtensions)}");
                 }
             }
+
             return ValidationResult.Success;
         }
     }
