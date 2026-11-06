@@ -10,6 +10,7 @@
         public Task<Asset?> GetAssetDetailsAsync(int assetId);
         public Task<Asset?> GetAssetDetailsAsync(int assetId, int userId);
         public Task<RevisionFileViewModel?> GetRevisionFileAsync(int revisionId, int userId);
+        public Task<RevisionFileViewModel?> GetCurrentRevisionFileAsync(int assetId, int userId);
         public Task<AddRevisionViewModel?> GetAddRevisionViewModelAsync(int assetId, int userId);
         public Task<bool> CreateRevisionAsync(AddRevisionViewModel model, int userId);
         public Task<EditAssetViewModel?> GetEditFormAsync(int assetId, int userId);

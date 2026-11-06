@@ -67,6 +67,27 @@
             return revision;
         }
 
+        public async Task<RevisionFileViewModel?> GetCurrentRevisionFileAsync(int assetId, int userId)
+        {
+            var revision = await dbContext.Revisions
+                .AsNoTracking()
+                .Where(r => r.AssetId == assetId
+                            && r.Asset.OwnerId == userId
+                            && !r.Asset.IsDeleted
+                            && r.RevisionId == r.Asset.CurrentRevisionId)
+                .Select(r => new RevisionFileViewModel
+                {
+                    RevisionId = r.RevisionId,
+                    AssetId = r.AssetId,
+                    FilePath = r.FilePath,
+                    OriginalFIleName = r.OriginalFileName,
+                    FileExtension = r.FileExtension
+                })
+                .FirstOrDefaultAsync();
+
+            return revision;
+        }
+
         public async Task<string?> DeleteRevisionAsync(int revisionId, int userId)
         {
             var revision = await dbContext.Revisions

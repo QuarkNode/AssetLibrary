@@ -9,8 +9,6 @@
 }
 
 <div class="pd-wrap">
-
-    <!-- Breadcrumb matching your Trash Details style -->
     <div class="pd-eyebrow mb-3">
         <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Library</a> /
         <span>Project Details</span>
@@ -59,3 +57,37 @@
         </div>
     }
 </div>
+
+<partial name="_ModelViewerModal" />
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inspectButtons = document.querySelectorAll('[data-action="inspect-model"]');
+
+            inspectButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const assetId = this.dataset.assetId;
+                    const assetName = this.dataset.assetName;
+
+                    document.getElementById('modelViewerAssetName').textContent = assetName;
+                    document.getElementById('viewerStatus').textContent =
+                        `Selected asset: ${assetId}`;
+
+                    window.dispatchEvent(new CustomEvent('load-asset-model', {
+                        detail: { 
+                            assetId: assetId,
+                            previewUrl: '@Url.Action("GetModelPreview", "Asset")' }
+                    }));
+
+                    const modalElement = document.getElementById('modelViewerModal');
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+                    modal.show();
+                });
+            });
+        });
+    </script>
+}
+
+<script type="module" src="@Url.Content("~/dist/assets/viewer-mE0wvizL.js")"></script>

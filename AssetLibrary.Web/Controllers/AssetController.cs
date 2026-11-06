@@ -60,6 +60,66 @@ namespace AssetLibrary.Controllers
             return PhysicalFile(fullPath, "application/octet-stream", revision.OriginalFIleName);
         }
 
+        public async Task<IActionResult> GetModelPreview(int id)
+        {
+            var revision = await assetService.GetCurrentRevisionFileAsync(id, User.GetRequiredUserId());
+
+            if (revision == null)
+            {
+                return NotFound();
+            }
+
+            var allowedExtensions = new[] { ".obj", ".stl", ".fbx" };
+
+            if (!allowedExtensions.Contains(revision.FileExtension.ToLowerInvariant()))
+            {
+                return BadRequest("Unsupported 3D model format.");
+            }
+
+            string? fullPath = fileStorage.GetPhysicalPath(revision.FilePath);
+
+            if (fullPath == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new
+            {
+                revisionId = revision.RevisionId,
+                fileName = revision.OriginalFIleName,
+                extension = revision.FileExtension,
+                url = Url.Action(nameof(PreviewModelFile),
+                new { id = revision.RevisionId })
+            });
+        }
+
+        // Serves the 3D model file to the viewer.
+
+        [HttpGet]
+        public async Task<IActionResult> PreviewModelFile(int id) // id = Revision Id
+        {
+            var revision = await assetService.GetRevisionFileAsync(
+                id, User.GetRequiredUserId());
+
+            if (revision == null)
+            {
+                return NotFound();
+            }
+
+            string? fullPath = fileStorage.GetPhysicalPath(revision.FilePath);
+
+            if (fullPath == null || !System.IO.File.Exists(fullPath))
+            {
+                return NotFound();
+            }
+
+            // Serve the file inline, without forcing a download.
+            return PhysicalFile(
+                fullPath,
+                "application/octet-stream",
+                enableRangeProcessing: true);
+        }
+
         // URL: ~/Project/Details/{ProjectId}
         // Gets the EditForm view.
 
@@ -233,5 +293,7 @@ namespace AssetLibrary.Controllers
 
             return RedirectToAction(nameof(Details), new { id = model.AssetId });
         }
+
+
     }
 }

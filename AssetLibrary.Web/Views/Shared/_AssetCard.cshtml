@@ -26,6 +26,16 @@
                             Replace File
                         </a>
                     </li>
+                    <li>
+                        <button type="button"
+                                class="dropdown-item"
+                                data-action="inspect-model"
+                                data-asset-id="@Model.AssetId"
+                                data-asset-name="@Model.AssetName">
+                            <i class="bi bi-box me-2"></i>
+                            3D Inspect
+                        </button>
+                    </li>
                     <li><hr class="dropdown-divider my-1"></li>
                     <li>
                         <form asp-controller="Asset" asp-action="Delete" asp-route-id="@Model.AssetId" method="post"

@@ -1,0 +1,48 @@
+﻿
+<div class="modal fade" id="modelViewerModal" tabindex="-1" aria-labelledby="modelViewerTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark text-light">
+
+            <div class="modal-header border-secondary">
+                <div>
+                    <h5 class="modal-title" id="modelViewerTitle">3D Inspection</h5>
+                    <small class="text-secondary" id="modelViewerAssetName"></small>
+                </div>
+
+                <button type="button" class="btn-close btn-close-white"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-2">
+                <div class="d-flex flex-wrap gap-2 mb-2">
+                    <button type="button" class="btn btn-sm btn-outline-light" id="resetView">
+                        Reset View
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" id="toggleWireframe">
+                        Wireframe
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-light" id="toggleGrid">
+                        Toggle Grid
+                    </button>
+                    @* <button type="button" class="btn btn-sm btn-outline-light" id="viewerFullscreen">
+                        Fullscreen
+                    </button> *@
+                </div>
+
+                <div id="modelViewerContainer"
+                     style="width: 100%; height: 500px; background: #202020; overflow: hidden;">
+                </div>
+            </div>
+
+            <div class="modal-footer border-secondary">
+                <small class="text-secondary me-auto" id="viewerStatus">
+                    Ready
+                </small>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
