@@ -16,7 +16,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
-            
+
             <!-- Simple & Clean Header with Revision Badge -->
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
@@ -32,11 +32,12 @@
             <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                 <div class="card-body p-4 p-md-5 bg-white">
                     <form asp-action="AddRevision" method="post" enctype="multipart/form-data" class="needs-validation">
-                        
+
                         <!-- Validation Summary -->
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 small py-2" role="alert"></div>
 
                         <input type="hidden" asp-for="AssetId" />
+                        <input asp-for="ThumbnailFile" type="file" id="Thumbnail" accept=".png" hidden />
 
                         <!-- File Input Section -->
                         <div class="mb-4">
@@ -88,4 +89,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script type="module" src="~/dist/assets/uploadThumbnail-DKBmxIe1.js"></script>
 }

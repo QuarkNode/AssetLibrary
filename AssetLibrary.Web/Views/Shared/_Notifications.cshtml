@@ -1,5 +1,42 @@
-﻿@*
-   // TO-DO: Add a notification system to the application. This could include notifications for new assets, project updates, or other relevant events. The notifications could be displayed in a dropdown menu or a dedicated notifications page.
-*@
-@{
-}
+﻿
+<div class="notification-container">
+    @{
+        var notifications = new[]
+        {
+            new { Key = "SuccessMessage", Type = "success", Icon = "bi-check-circle", Title = "Success", AutoDismiss = true },
+            new { Key = "ErrorMessage", Type = "danger", Icon = "bi-exclamation-circle", Title = "Error", AutoDismiss = false },
+            new { Key = "WarningMessage", Type = "warning", Icon = "bi-exclamation-triangle", Title = "Warning", AutoDismiss = false },
+            new { Key = "InfoMessage", Type = "info", Icon = "bi-info-circle", Title = "Information", AutoDismiss = true }
+        };
+    }
+
+    @foreach (var notification in notifications)
+    {
+        var message = TempData[notification.Key]?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(message))
+        {
+            <div class="alert alert-@notification.Type alert-dismissible fade show d-flex align-items-center"
+                 role="alert"
+                 data-auto-dismiss="@(notification.AutoDismiss ? "5000" : null)">
+
+                <i class="bi @notification.Icon me-2"></i>
+
+                <div class="flex-grow-1">
+                    <strong>@notification.Title:</strong> @message
+                </div>
+
+                <button type="button"
+                        class="btn-close ms-auto"
+                        data-bs-dismiss="alert"
+                        aria-label="Close">
+                </button>
+
+                @if (notification.AutoDismiss)
+                {
+                    <div class="notification-progress"></div>
+                }
+            </div>
+        }
+    }
+</div>

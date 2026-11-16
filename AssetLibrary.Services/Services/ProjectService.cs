@@ -6,23 +6,25 @@
     using AssetLibrary.Data.Models.Enum;
 
     using AssetLibrary.Services.Contracts;
-
+    using AssetLibrary.Services.Models;
     using AssetLibrary.Services.Models.Asset;
     using AssetLibrary.Services.Models.Project;
 
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
-
+    using Microsoft.Extensions.Logging;
     using static AssetLibrary.Data.Common.ViewModelValidation;
 
     public class ProjectService : IProjectService
     {
         private readonly AssetLibraryDbContext dbContext;
+        private readonly ILogger<ProjectService> logger;
         private readonly IFileStorageService fileStorageService;
 
-        public ProjectService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService)
+        public ProjectService(AssetLibraryDbContext dbContext, ILogger<ProjectService> logger, IFileStorageService fileStorageService)
         {
             this.dbContext = dbContext;
+            this.logger = logger;
             this.fileStorageService = fileStorageService;
         }
 
@@ -50,6 +52,7 @@
                             Status = a.Status,
                             MaterialName = a.Material.MaterialName,
                             CurrentRevisionNumber = a.CurrentRevision.RevisionNumber,
+                            ThumbnailPath = a.CurrentRevision.ThumbnailPath,
                             IsDeleted = false
                         })
                         .ToList()
@@ -92,7 +95,7 @@
             return viewModel;
         }
 
-        public async Task ProcessAssetUploadViewModelAsync(AddAssetViewModel model, int userId)
+        public async Task ProcessAssetUploadViewModelAsync(AddAssetViewModel model, ThumbnailUpload? thumbnail, int userId)
         {
             Asset asset = new Asset
             {
@@ -132,8 +135,9 @@
 
             asset.CurrentRevisionId = revision.RevisionId;
             await dbContext.SaveChangesAsync();
+            await SaveThumbnailAsync(thumbnail, revision, subFolder);
         }
-        public async Task<int> ProcessAssetUploadViewModelAsync(UploadAssetViewModel viewModel, int userId)
+        public async Task<int> ProcessAssetUploadViewModelAsync(UploadAssetViewModel viewModel, ThumbnailUpload? thumbnail, int userId)
         {
             int count = await dbContext.Projects
                 .CountAsync(p => p.OwnerId == userId);
@@ -192,6 +196,7 @@
 
             newAsset.CurrentRevisionId = revision.RevisionId;
             await dbContext.SaveChangesAsync();
+            await SaveThumbnailAsync(thumbnail, revision, subFolder);
 
             return newAsset.ProjectId;
         }
@@ -275,6 +280,44 @@
         }
 
         // Methods
+        private async Task SaveThumbnailAsync(ThumbnailUpload? thumbnail, Revision revision, string subFolder)
+        {
+            if (thumbnail == null)
+            {
+                return;
+            }
+
+            try
+            {
+                bool isValid = await fileStorageService.IsValidThumbnailAsync(thumbnail);
+
+                if (!isValid)
+                {
+                    return;
+                }
+
+                if (thumbnail.Content.CanSeek)
+                {
+                    thumbnail.Content.Position = 0;
+                }
+
+                string thumbnailPath = await fileStorageService.SaveAsync(
+                    thumbnail.Content,
+                    thumbnail.FileName,
+                    subFolder);
+
+                revision.ThumbnailPath = thumbnailPath;
+                revision.ThumbnailGeneratedOn = DateTime.UtcNow;
+
+                await dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                // Thumbnail failure must not interrupt the original asset upload.
+
+                logger.LogWarning(ex, "Failed to generate thumbnail for revision {RevisionId}", revision.RevisionId);
+            }
+        }
         private static Project CreateNewProject(UploadAssetViewModel viewModel, int userId)
         {
             return new()
@@ -317,5 +360,6 @@
                 ChangeNotes = "Initial upload"
             };
         }
+
     }
 }

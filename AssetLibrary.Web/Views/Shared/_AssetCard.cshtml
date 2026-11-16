@@ -48,6 +48,21 @@
         </div>
     </div>
 
+    <div class="asset-thumbnail">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailPath))
+        {
+            <img src="@Model.ThumbnailPath"
+                 alt="@Model.AssetName thumbnail"
+                 loading="lazy" />
+        }
+        else
+        {
+            <div class="asset-thumbnail-placeholder">
+                <i class="bi bi-box"></i>
+            </div>
+        }
+    </div>
+
     <p class="asset-name">
         <a class="stretched-link text-decoration-none text-reset"
            asp-controller="Asset" asp-action="Details" asp-route-id="@Model.AssetId">@Model.AssetName</a>

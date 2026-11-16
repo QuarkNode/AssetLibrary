@@ -17,6 +17,12 @@
         [StringLength(FilePathMaxLength)]
         public string FilePath { get; set; } = null!;
 
+        [StringLength(FilePathMaxLength)]
+        public string? ThumbnailPath { get; set; }
+
+        [Column(TypeName = "DATETIME2(3)")]
+        public DateTime? ThumbnailGeneratedOn { get; set; }
+
         [Required]
         [StringLength(FileExtensionMaxLength, MinimumLength = FileExtensionMinLength)]
         public string FileExtension { get; set; } = null!;

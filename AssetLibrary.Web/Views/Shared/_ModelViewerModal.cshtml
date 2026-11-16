@@ -14,19 +14,64 @@
             </div>
 
             <div class="modal-body p-2">
-                <div class="d-flex flex-wrap gap-2 mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-light" id="resetView">
+
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2 p-2 rounded"
+                     style="background: #292929;">
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-light"
+                            id="resetView"
+                            title="Restore the default camera view">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
                         Reset View
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-light" id="toggleWireframe">
+
+                    <button type="button" class="btn btn-sm btn-outline-light"
+                            id="viewFront" title="Front view">
+                        <i class="bi bi-square me-1"></i> Front
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-outline-light"
+                            id="viewSide" title="Side view">
+                        <i class="bi bi-layout-sidebar me-1"></i> Side
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-outline-light"
+                            id="viewTop" title="Top view">
+                        <i class="bi bi-arrow-down-square me-1"></i> Top
+                    </button>
+
+                    <button type="button" class="btn btn-sm btn-outline-light"
+                            id="viewIsometric" title="Isometric view">
+                        <i class="bi bi-box me-1"></i> Isometric
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-info"
+                            id="toggleProjection"
+                            title="Switch camera projection">
+                        <i class="bi bi-bounding-box me-1"></i>
+                        Orthographic
+                    </button>
+
+                    <div class="vr bg-secondary mx-1"></div>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-info"
+                            id="toggleWireframe"
+                            title="Toggle wireframe display">
+                        <i class="bi bi-diagram-3 me-1"></i>
                         Wireframe
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-light" id="toggleGrid">
-                        Toggle Grid
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-info"
+                            id="toggleGrid"
+                            title="Show or hide the reference grid">
+                        <i class="bi bi-grid-3x3 me-1"></i>
+                        Grid
                     </button>
-                    @* <button type="button" class="btn btn-sm btn-outline-light" id="viewerFullscreen">
-                        Fullscreen
-                    </button> *@
+
                 </div>
 
                 <div id="modelViewerContainer"

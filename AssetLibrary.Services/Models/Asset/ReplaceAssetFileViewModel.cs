@@ -19,7 +19,7 @@
         [AllowedExtensions(".obj", ".stl", ".fbx")]
         [MaxFileSize(MaxFileSizeInMB)]
         public IFormFile File { get; set; } = null!;
-
+        public IFormFile? ThumbnailFile { get; set; }
 
     }
 }

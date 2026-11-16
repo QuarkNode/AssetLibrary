@@ -39,5 +39,7 @@
         public IFormFile File { get; set; } = null!;
         public IEnumerable<SelectListItem>? Materials { get; set; }
 
+        public IFormFile? Thumbnail { get; set; }
+
     }
 }

@@ -13,9 +13,9 @@
         To keep history, use <em>Upload New Revision</em> on the asset page instead.
     </div>
 
-    <form asp-controller="Asset" asp-action="ReplaceFile" asp-route-id="@Model.AssetId"
-          method="post" enctype="multipart/form-data"
+    <form asp-controller="Asset" asp-action="ReplaceFile" asp-route-id="@Model.AssetId" method="post" enctype="multipart/form-data"
           onsubmit="return confirm('Replace the file and delete all previous revisions? This cannot be undone.');">
+        <input asp-for="ThumbnailFile" type="file" id="Thumbnail" accept=".png" hidden />
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <div class="mb-3">
@@ -28,3 +28,9 @@
         <a asp-action="Details" asp-route-id="@Model.AssetId" class="btn btn-outline-secondary">Cancel</a>
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="module" src="~/dist/assets/uploadThumbnail-DKBmxIe1.js"></script>
+}

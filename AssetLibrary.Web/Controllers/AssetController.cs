@@ -1,5 +1,6 @@
 ﻿using AssetLibrary.Extensions;
 using AssetLibrary.Services.Contracts;
+using AssetLibrary.Services.Models;
 using AssetLibrary.Services.Models.Asset;
 using AssetLibrary.Services.Models.Revision;
 using Microsoft.AspNetCore.Authorization;
@@ -157,6 +158,7 @@ namespace AssetLibrary.Controllers
                 return NotFound();
             }
 
+            TempData["SuccessMessage"] = "Asset has been updated successfully.";
             return RedirectToAction("Details", "Project", new { id = model.ProjectId });
         }
 
@@ -195,14 +197,28 @@ namespace AssetLibrary.Controllers
                 return View(model);
             }
 
-            bool success = await assetService.ReplaceAssetFileAsync(id, User.GetRequiredUserId(), model);
+            using Stream? thumbnailStream = model.ThumbnailFile?.OpenReadStream();
+
+            ThumbnailUpload? thumbnail = null;
+
+            if (thumbnailStream != null && model.ThumbnailFile!.Length > 0)
+            {
+                thumbnail = new ThumbnailUpload
+                {
+                    Content = thumbnailStream,
+                    FileName = model.ThumbnailFile.FileName,
+                    Length = model.ThumbnailFile.Length
+                };
+            }
+
+            bool success = await assetService.ReplaceAssetFileAsync(id, User.GetRequiredUserId(), model, thumbnail);
 
             if (!success)
             {
                 return NotFound();
             }
 
-            TempData["SuccessMessage"] = "File replaced. Previous revisions were removed.";
+            TempData["SuccessMessage"] = "File has been replaced and previous revisions were removed.";
             return RedirectToAction("Details", new { id });
         }
 
@@ -210,23 +226,24 @@ namespace AssetLibrary.Controllers
         // Deletes an Asset permanently.
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id) // id = AssetId
         {
-            var asset = await assetService.GetAssetDetailsAsync(id, User.GetRequiredUserId());
+            var asset = await assetService.GetDeleteAssetViewModelAsync(id, User.GetRequiredUserId());
 
             if (asset == null)
             {
                 return NotFound();
             }
 
-            bool success = await assetService.DeleteAssetPermanently(asset);
+            bool success = await assetService.DeleteAssetPermanently(id, User.GetRequiredUserId());
 
             if (!success)
             {
                 return NotFound();
             }
 
-            TempData["SuccessMessage"] = "Asset file deleted successfully.";
+            TempData["SuccessMessage"] = "Asset file has beendeleted successfully.";
             return RedirectToAction("Details", "Project", new { id = asset.ProjectId });
         }
 
@@ -240,12 +257,14 @@ namespace AssetLibrary.Controllers
                 return NotFound();
             }
 
+            string? thumbnailPath = revision.ThumbnailPath;
             string? filePath = await assetService.DeleteRevisionAsync(id, User.GetRequiredUserId());
             if (filePath == null)
             {
                 return NotFound();
             }
 
+            fileStorage.DeleteFile(thumbnailPath);
             fileStorage.DeleteFile(filePath);
 
             TempData["SuccessMessage"] = "Revision deleted successfully.";
@@ -269,12 +288,13 @@ namespace AssetLibrary.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddRevision(AddRevisionViewModel model)
         {
-
             if (!ModelState.IsValid)
             {
                 var form = await assetService.GetAddRevisionViewModelAsync(model.AssetId, User.GetRequiredUserId());
+
                 if (form == null)
                 {
                     return NotFound();
@@ -283,17 +303,30 @@ namespace AssetLibrary.Controllers
                 model.AssetName = form.AssetName;
                 model.ProjectId = form.ProjectId;
                 model.NextRevisionNumber = form.NextRevisionNumber;
+
                 return View(model);
             }
 
-            if (!await assetService.CreateRevisionAsync(model, User.GetRequiredUserId()))
+            using Stream? thumbnailStream = model.ThumbnailFile?.OpenReadStream();
+
+            ThumbnailUpload? thumbnail = null;
+
+            if (thumbnailStream != null && model.ThumbnailFile!.Length > 0)
+            {
+                thumbnail = new ThumbnailUpload
+                {
+                    Content = thumbnailStream,
+                    FileName = model.ThumbnailFile.FileName,
+                    Length = model.ThumbnailFile.Length
+                };
+            }
+
+            if (!await assetService.CreateRevisionAsync(model, thumbnail, User.GetRequiredUserId()))
             {
                 return NotFound();
             }
 
             return RedirectToAction(nameof(Details), new { id = model.AssetId });
         }
-
-
     }
 }

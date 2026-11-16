@@ -132,6 +132,7 @@
                                 <div class="file-upload-wrapper border border-2 border-dashed rounded-3 p-4 text-center bg-light">
                                     <i class="bi bi-cloud-upload display-6 text-primary mb-2 d-block"></i>
                                     <input asp-for="File" type="file" class="form-control form-control-sm border-0 bg-transparent mx-auto w-auto" accept=".obj,.stl,.fbx" />
+                                    <input asp-for="Thumbnail" type="file" id="Thumbnail" accept=".png" hidden />
                                     <div class="form-text text-muted mt-2">
                                         Accepted formats: <span class="badge bg-secondary text-light">.obj</span> <span class="badge bg-secondary text-light">.stl</span> <span class="badge bg-secondary text-light">.fbx</span>
                                     </div>
@@ -155,3 +156,8 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script type="module" src="~/dist/assets/uploadThumbnail-DKBmxIe1.js"></script>
+}

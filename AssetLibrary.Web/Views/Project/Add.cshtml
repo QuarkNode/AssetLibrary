@@ -16,7 +16,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
-            
+
             <!-- Simple & Clean Header with Project Badge -->
             <div class="d-flex justify-content-between align-items-end mb-4">
                 <div>
@@ -35,7 +35,7 @@
             <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                 <div class="card-body p-4 p-md-5 bg-white">
                     <form asp-action="Add" method="post" enctype="multipart/form-data" class="needs-validation">
-                        
+
                         <!-- Validation Summary -->
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 small py-2" role="alert"></div>
 
@@ -89,6 +89,7 @@
                                 <div class="file-upload-wrapper border border-2 border-dashed rounded-3 p-4 text-center bg-light">
                                     <i class="bi bi-cloud-upload display-6 text-primary mb-2 d-block"></i>
                                     <input asp-for="File" type="file" class="form-control form-control-sm border-0 bg-transparent mx-auto w-auto" accept=".obj,.stl,.fbx" />
+                                    <input asp-for="Thumbnail" type="file" id="Thumbnail" accept=".png" hidden />
                                     <div class="form-text text-muted mt-2">
                                         Accepted formats: <span class="badge bg-secondary text-light">.obj</span> <span class="badge bg-secondary text-light">.stl</span> <span class="badge bg-secondary text-light">.fbx</span>
                                     </div>
@@ -115,4 +116,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script type="module" src="~/dist/assets/uploadThumbnail-DKBmxIe1.js"></script>
 }

@@ -12,5 +12,6 @@ namespace AssetLibrary.Services.Models.Asset
         public int? CurrentRevisionNumber { get; set; }
         public bool IsDeleted { get; set; }
         public int? RevisionCount { get; set; }
+        public string? ThumbnailPath { get; set; }
     }
 }

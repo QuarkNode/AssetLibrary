@@ -123,9 +123,20 @@
                 .Select(r => r.FilePath)
                 .ToList();
 
+            var thumbnailPaths = assets
+                .SelectMany(a => a.Revisions)
+                .Where(r => !string.IsNullOrEmpty(r.ThumbnailPath))
+                .Select(r => r.ThumbnailPath)
+                .ToList();
+
             foreach (var asset in assets)
             {
                 asset.CurrentRevisionId = null;
+
+                foreach (var revision in asset.Revisions)
+                {
+                    revision.ThumbnailGeneratedOn = null;
+                }
             }
 
             await dbContext.SaveChangesAsync();
@@ -136,9 +147,14 @@
 
             await dbContext.SaveChangesAsync();
 
-            foreach (var path in filePaths)
+            foreach (var filePath in filePaths)
             {
-                fileStorageService.DeleteFile(path);
+                fileStorageService.DeleteFile(filePath);
+            }
+
+            foreach (var thumbnailPath in thumbnailPaths)
+            {
+                fileStorageService.DeleteFile(thumbnailPath);
             }
 
             return true;

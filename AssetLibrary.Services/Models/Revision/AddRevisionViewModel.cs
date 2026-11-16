@@ -18,6 +18,8 @@
         [MaxFileSize(MaxFileSizeInMB)]
         public IFormFile File { get; set; } = null!;
 
+        public IFormFile? ThumbnailFile { get; set; }
+
         [Required(ErrorMessage = "Please describe what changed")]
         [MaxLength(RevisionAddChangeNotesMaxLength)]
         public string ChangeNotes { get; set; } = null!;

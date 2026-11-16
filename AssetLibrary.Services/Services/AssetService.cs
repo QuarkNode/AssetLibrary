@@ -3,18 +3,23 @@
     using AssetLibrary.Data;
     using AssetLibrary.Data.Models;
     using AssetLibrary.Services.Contracts;
+    using AssetLibrary.Services.Models;
     using AssetLibrary.Services.Models.Asset;
     using AssetLibrary.Services.Models.Revision;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class AssetService : IAssetService
     {
         private readonly AssetLibraryDbContext dbContext;
+
+        private readonly ILogger<AssetService> logger;
         private readonly IFileStorageService fileStorageService;
-        public AssetService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService)
+        public AssetService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService, ILogger<AssetService> logger)
         {
             this.dbContext = dbContext;
+            this.logger = logger;
             this.fileStorageService = fileStorageService;
 
         }
@@ -48,6 +53,23 @@
             return asset;
         }
 
+        public async Task<DeleteAssetViewModel?> GetDeleteAssetViewModelAsync(int assetId, int userId)
+        {
+            var model = await dbContext.Assets
+                .AsNoTracking()
+                .Where(a => a.AssetId == assetId && a.OwnerId == userId && !a.IsDeleted)
+                .Select(a => new DeleteAssetViewModel
+                {
+                    AssetId = a.AssetId,
+                    AssetName = a.AssetName,
+                    ProjectId = a.ProjectId,
+                    ProjectName = a.Project.ProjectName,
+                    ThumbnailPath = a.CurrentRevision != null ? a.CurrentRevision.ThumbnailPath : null
+                })
+                .FirstOrDefaultAsync();
+
+            return model;
+        }
         public async Task<RevisionFileViewModel?> GetRevisionFileAsync(int revisionId, int userId)
         {
             var revision = await dbContext.Revisions
@@ -60,7 +82,9 @@
                     RevisionId = r.RevisionId,
                     AssetId = r.Asset.AssetId,
                     FilePath = r.FilePath,
-                    OriginalFIleName = r.OriginalFileName
+                    ThumbnailPath = r.ThumbnailPath ?? string.Empty,
+                    OriginalFIleName = r.OriginalFileName,
+                    FileExtension = r.FileExtension
                 })
                 .FirstOrDefaultAsync();
 
@@ -80,6 +104,7 @@
                     RevisionId = r.RevisionId,
                     AssetId = r.AssetId,
                     FilePath = r.FilePath,
+                    ThumbnailPath = r.ThumbnailPath ?? string.Empty,
                     OriginalFIleName = r.OriginalFileName,
                     FileExtension = r.FileExtension
                 })
@@ -104,15 +129,15 @@
 
             if (asset.CurrentRevisionId == revision.RevisionId)
             {
-                asset.CurrentRevisionId = null;
+                var previousRevision = await dbContext.Revisions
+                    .Where(r =>
+                        r.AssetId == asset.AssetId &&
+                        r.RevisionId != revisionId)
+                    .OrderByDescending(r => r.RevisionNumber)
+                    .FirstOrDefaultAsync();
 
-                //asset.CurrentRevisionId = await dbContext.Revisions
-                //    .Where(r => r.AssetId == asset.AssetId && r.RevisionId != revisionId)
-                //    .OrderByDescending(r => r.RevisionNumber)
-                //    .Select(r => (int?)r.RevisionId)
-                //    .FirstOrDefaultAsync();
-
-                await dbContext.SaveChangesAsync();
+                asset.CurrentRevision = previousRevision;
+                asset.CurrentRevisionId = previousRevision?.RevisionId;
             }
 
             dbContext.Revisions.Remove(revision);
@@ -137,55 +162,19 @@
                  .FirstOrDefaultAsync();
         }
 
-        public async Task<bool> CreateRevisionAsync(AddRevisionViewModel model, int userId)
+        public async Task<bool> CreateRevisionAsync(AddRevisionViewModel model, ThumbnailUpload? thumbnail, int userId)
         {
-            //var asset = await CreateAsset(model, userId);
-
-            //if (asset == null)
-            //{
-            //    return false;
-            //}
-
-            //string subFolder = Path.Combine("assets", asset.AssetId.ToString()); // <---
-            //string relativePath = await fileStorageService.SaveAsync(model.File, subFolder); // <--- 
-            //string extension = Path.GetExtension(model.File.FileName).ToLowerInvariant();
-
-            //Revision revision = new()
-            //{
-            //    AssetId = asset.AssetId,
-            //    FilePath = relativePath,
-            //    FileExtension = extension,
-            //    OriginalFileName = Path.GetFileName(model.File.FileName),
-            //    FileSizeBytes = model.File.Length,
-            //    RevisionNumber = model.NextRevisionNumber,
-            //    UploadedByUserId = userId,
-            //    UploadedOn = DateTime.UtcNow,
-            //    ChangeNotes = model.ChangeNotes
-            //};
-
-            //dbContext.Revisions.Add(revision);
-            //asset.CurrentRevision = revision;
-            //asset.UpdatedOn = DateTime.UtcNow;
-            //try
-            //{
-            //    await dbContext.SaveChangesAsync();
-            //    return true;
-            //}
-            //catch
-            //{
-            //    fileStorageService.DeleteFile(relativePath);
-            //    throw;
-            //}
-
             var asset = await dbContext.Assets
-                .FirstOrDefaultAsync(a => a.AssetId == model.AssetId && a.OwnerId == userId && !a.IsDeleted);
+                .FirstOrDefaultAsync(a =>
+                    a.AssetId == model.AssetId &&
+                    a.OwnerId == userId &&
+                    !a.IsDeleted);
 
             if (asset == null)
             {
                 return false;
             }
 
-            // Don't trust the number from the form; compute it here
             int nextNumber = await GetNextRevisionNumberAsync(asset.AssetId);
 
             string relativePath = await fileStorageService.SaveAsync(model.File, $"assets/{asset.AssetId}");
@@ -203,7 +192,31 @@
                 ChangeNotes = model.ChangeNotes
             };
 
+            string? thumbnailPath = null;
+
             dbContext.Revisions.Add(revision);
+
+            if (thumbnail != null)
+            {
+                try
+                {
+                    if (await fileStorageService.IsValidThumbnailAsync(thumbnail))
+                    {
+                        thumbnail.Content.Position = 0;
+
+                        thumbnailPath = await fileStorageService.SaveAsync(thumbnail.Content, thumbnail.FileName, $"assets/{asset.AssetId}");
+
+                        revision.ThumbnailPath = thumbnailPath;
+                        revision.ThumbnailGeneratedOn = DateTime.UtcNow;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Thumbnail failure must not interrupt the original revision upload.
+                    logger.LogWarning(ex, "Failed to save thumbnail for revision {RevisionNumber} of asset {AssetId}", revision.RevisionNumber, asset.AssetId);
+                }
+            }
+
             asset.CurrentRevision = revision;
             asset.UpdatedOn = DateTime.UtcNow;
 
@@ -215,6 +228,12 @@
             catch
             {
                 fileStorageService.DeleteFile(relativePath);
+
+                if (thumbnailPath != null)
+                {
+                    fileStorageService.DeleteFile(thumbnailPath);
+                }
+
                 throw;
             }
         }
@@ -332,7 +351,7 @@
 
             return result;
         }
-        public async Task<bool> ReplaceAssetFileAsync(int assetId, int userId, ReplaceAssetFileViewModel model)
+        public async Task<bool> ReplaceAssetFileAsync(int assetId, int userId, ReplaceAssetFileViewModel model, ThumbnailUpload? thumbnail)
         {
             var asset = await dbContext.Assets
                 .Include(a => a.Revisions)
@@ -344,11 +363,33 @@
             }
 
             var oldFilePaths = asset.Revisions.Select(r => r.FilePath).ToList();
+            var oldThumbnailPaths = asset.Revisions.Select(r => r.ThumbnailPath).Where(p => !string.IsNullOrEmpty(p)).ToList();
+
             string newFilePath = await fileStorageService.SaveAsync(model.File, $"assets/{asset.AssetId}");
+
+            string? thumbnailPath = null;
 
             try
             {
-                // Clear the pointer first so the old revisions can be removed
+
+                if (thumbnail != null)
+                {
+                    try
+                    {
+                        if (await fileStorageService.IsValidThumbnailAsync(thumbnail))
+                        {
+                            thumbnail.Content.Position = 0;
+                            thumbnailPath = await fileStorageService.SaveAsync(thumbnail.Content, thumbnail.FileName, $"assets/{asset.AssetId}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Thumbnail failure must not interrupt the original revision upload.
+                        logger.LogWarning(ex, "Failed to save thumbnail for replaced asset {AssetId}", asset.AssetId);
+                    }
+                }
+
+
                 asset.CurrentRevisionId = null;
                 await dbContext.SaveChangesAsync();
 
@@ -364,7 +405,9 @@
                     RevisionNumber = 1,
                     UploadedByUserId = userId,
                     UploadedOn = DateTime.UtcNow,
-                    ChangeNotes = "Initial revision [File Replaced]"
+                    ChangeNotes = "Initial revision [File Replaced]",
+                    ThumbnailPath = thumbnailPath,
+                    ThumbnailGeneratedOn = thumbnailPath != null ? DateTime.UtcNow : null
                 };
 
                 dbContext.Revisions.Add(revision);
@@ -376,49 +419,62 @@
             catch
             {
                 fileStorageService.DeleteFile(newFilePath);
+
+                if (thumbnailPath != null)
+                {
+                    fileStorageService.DeleteFile(thumbnailPath);
+                }
+
                 throw;
             }
 
-            foreach (var path in oldFilePaths)
+            foreach (var oldFilePath in oldFilePaths)
             {
-                fileStorageService.DeleteFile(path);
+                fileStorageService.DeleteFile(oldFilePath);
+            }
+
+            foreach (var oldThumbnailPath in oldThumbnailPaths)
+            {
+                fileStorageService.DeleteFile(oldThumbnailPath);
             }
 
             return true;
         }
 
-        public async Task<bool> DeleteAssetPermanently(Asset asset)
+        public async Task<bool> DeleteAssetPermanently(int id, int userId)
         {
+            var asset = await dbContext.Assets
+                .Include(a => a.Revisions)
+                .FirstOrDefaultAsync(a => a.AssetId == id && a.OwnerId == userId && !a.IsDeleted);
+
             if (asset == null)
             {
                 return false;
             }
 
-            var tracked = await dbContext.Assets
-                .Include(a => a.Revisions)
-                .FirstOrDefaultAsync(a => a.AssetId == asset.AssetId && a.OwnerId == asset.OwnerId);
+            var filePaths = asset.Revisions
+                .Select(r => r.FilePath)
+                .ToList();
 
-            if (tracked == null)
-            {
-                return false;
-            }
+            var thumbnailPaths = asset.Revisions
+                .Where(r => !string.IsNullOrEmpty(r.ThumbnailPath))
+                .Select(r => r.ThumbnailPath)
+                .ToList();
 
-            var filePaths = tracked.Revisions.Select(r => r.FilePath).ToList();
-
-            tracked.CurrentRevisionId = null;
+            asset.CurrentRevisionId = null;
             await dbContext.SaveChangesAsync();
 
-            dbContext.Revisions.RemoveRange(tracked.Revisions);
-            dbContext.Assets.Remove(tracked);
+            dbContext.Revisions.RemoveRange(asset.Revisions);
+            dbContext.Assets.Remove(asset);
             await dbContext.SaveChangesAsync();
 
             foreach (var path in filePaths)
             {
-                //if (!string.IsNullOrEmpty(path) && File.Exists(path))
-                //{
-                //    File.Delete(path);
-                //}
+                fileStorageService.DeleteFile(path);
+            }
 
+            foreach (var path in thumbnailPaths)
+            {
                 fileStorageService.DeleteFile(path);
             }
 

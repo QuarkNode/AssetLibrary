@@ -3,6 +3,7 @@
     using AssetLibrary.Data.Exceptions;
     using AssetLibrary.Extensions;
     using AssetLibrary.Services.Contracts;
+    using AssetLibrary.Services.Models;
     using AssetLibrary.Services.Models.Asset;
     using AssetLibrary.Services.Models.Project;
     using Microsoft.AspNetCore.Authorization;
@@ -47,6 +48,7 @@
                 return NotFound();
             }
 
+            TempData["SuccessMessage"] = "Project has been deleted successfully.";
             return RedirectToAction("Index", "Home");
         }
 
@@ -96,6 +98,7 @@
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(UploadAssetViewModel viewModel)
         {
             if (!ModelState.IsValid)
@@ -103,9 +106,23 @@
                 return View(viewModel);
             }
 
+            using Stream? thumbnailStream = viewModel.Thumbnail?.OpenReadStream();
+
+            ThumbnailUpload? thumbnail = null;
+
+            if (thumbnailStream != null && viewModel.Thumbnail!.Length > 0)
+            {
+                thumbnail = new ThumbnailUpload
+                {
+                    Content = thumbnailStream,
+                    FileName = viewModel.Thumbnail.FileName,
+                    Length = viewModel.Thumbnail.Length
+                };
+            }
+
             try
             {
-                int projectId = await projectService.ProcessAssetUploadViewModelAsync(viewModel, User.GetRequiredUserId());
+                int projectId = await projectService.ProcessAssetUploadViewModelAsync(viewModel, thumbnail, User.GetRequiredUserId());
 
                 return RedirectToAction("Details", "Project", new { id = projectId });
             }
@@ -165,7 +182,21 @@
 
             try
             {
-                await projectService.ProcessAssetUploadViewModelAsync(model, User.GetRequiredUserId());
+                using Stream? thumbnailStream = model.Thumbnail?.OpenReadStream();
+
+                ThumbnailUpload? thumbnail = null;
+
+                if (thumbnailStream != null && model.Thumbnail!.Length > 0)
+                {
+                    thumbnail = new ThumbnailUpload
+                    {
+                        Content = thumbnailStream,
+                        FileName = model.Thumbnail.FileName,
+                        Length = model.Thumbnail.Length
+                    };
+                }
+
+                await projectService.ProcessAssetUploadViewModelAsync(model, thumbnail, User.GetRequiredUserId());
                 return RedirectToAction("Details", "Project", new { id = model.ProjectId });
             }
             catch (Exception)

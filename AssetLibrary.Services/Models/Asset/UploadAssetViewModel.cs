@@ -35,6 +35,9 @@
         [AllowedExtensions(".obj", ".stl", ".fbx")]
         [MaxFileSize(MaxFileSizeInMB)]
         public IFormFile File { get; set; } = null!;
+
+        public IFormFile? Thumbnail { get; set; }
+
         public bool IsNewProject { get; set; }
 
         [Display(Name = "New Project Name")]
