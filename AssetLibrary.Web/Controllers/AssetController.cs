@@ -13,10 +13,12 @@ namespace AssetLibrary.Controllers
     {
         private readonly IAssetService assetService;
         private readonly IFileStorageService fileStorage;
-        public AssetController(IAssetService assetService, IFileStorageService fileStorage)
+        private readonly IThumbnailService thumbnailService;
+        public AssetController(IAssetService assetService, IFileStorageService fileStorage, IThumbnailService thumbnailService)
         {
             this.assetService = assetService;
             this.fileStorage = fileStorage;
+            this.thumbnailService = thumbnailService;
         }
 
 
@@ -243,8 +245,8 @@ namespace AssetLibrary.Controllers
                 return NotFound();
             }
 
-            TempData["SuccessMessage"] = "Asset file has beendeleted successfully.";
-            return RedirectToAction("Details", "Project", new { id = asset.ProjectId });
+            TempData["SuccessMessage"] = "Asset file has been deleted successfully.";
+            return RedirectToAction("Details", "Project", new { id = asset.ProjectId, updateThumbnail = true });
         }
 
         [HttpPost]
@@ -264,7 +266,7 @@ namespace AssetLibrary.Controllers
                 return NotFound();
             }
 
-            fileStorage.DeleteFile(thumbnailPath);
+            thumbnailService.DeleteThumbnail(thumbnailPath);
             fileStorage.DeleteFile(filePath);
 
             TempData["SuccessMessage"] = "Revision deleted successfully.";

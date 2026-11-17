@@ -88,6 +88,23 @@
             });
         });
     </script>
+
+    @if (ViewBag.UpdateThumbnail == true)
+    {
+        <div id="projectThumbnailUpdater"
+             data-project-id="@Model.ProjectId"
+             data-model-paths-url="@Url.Action("GetProjectModelPaths", "Project")"
+             data-save-thumbnail-url="@Url.Action("UpdateProjectThumbnail", "Project")">
+        </div>
+
+        <form id="projectThumbnailAntiForgeryForm" class="d-none">
+            @Html.AntiForgeryToken()
+        </form>
+
+        <script type="module" src="@Url.Content("~/dist/assets/uploadThumbnail-CL6k8Hvm.js")"></script>
+    }
 }
+
+
 
 <script type="module" src="@Url.Content("~/dist/assets/viewer-DKb38B29.js")"></script>

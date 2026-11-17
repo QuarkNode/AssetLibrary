@@ -13,6 +13,7 @@ namespace AssetLibrary.Services.Models.Trash
         public Status Status { get; set; }
         public DateTime? DeletedOn { get; set; }
         public DateTime CreatedOn { get; set; }
+        public string? ThumbnailPath { get; set; }
         public List<AssetCardViewModel> Assets { get; set; } = new();
     }
 }

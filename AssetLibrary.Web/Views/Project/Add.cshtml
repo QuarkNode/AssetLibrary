@@ -34,7 +34,14 @@
             <!-- Sleek Card Container -->
             <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
                 <div class="card-body p-4 p-md-5 bg-white">
-                    <form asp-action="Add" method="post" enctype="multipart/form-data" class="needs-validation">
+                    <form asp-action="Add"
+                    method="post" 
+                    enctype="multipart/form-data" 
+                    class="needs-validation" 
+                    id="assetUploadForm" 
+                    data-project-id="@Model.ProjectId" 
+                    data-model-paths-url="@Url.Action("GetProjectModelPaths", "Project")" 
+                    data-save-thumbnail-url="@Url.Action("UpdateProjectThumbnail", "Project")">
 
                         <!-- Validation Summary -->
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger border-0 shadow-sm rounded-3 mb-4 small py-2" role="alert"></div>
@@ -116,5 +123,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script type="module" src="~/dist/assets/uploadThumbnail-DKBmxIe1.js"></script>
+    <script type="module" src="~/dist/assets/uploadThumbnail-CL6k8Hvm.js"></script>
 }

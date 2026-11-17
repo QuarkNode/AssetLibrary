@@ -254,29 +254,3 @@
         background-color: #FBF9F4;
         color: #C9612D;
     }
-
-
-/* 3D Viewer Fullscreen */
-/*#modelViewerModal .modal-dialog:fullscreen {
-    width: 100vw;
-    max-width: none;
-    height: 100vh;
-    margin: 0;
-}
-
-    #modelViewerModal .modal-dialog:fullscreen .modal-content {
-        height: 100%;
-    }
-
-    #modelViewerModal .modal-dialog:fullscreen .modal-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    #modelViewerModal .modal-dialog:fullscreen #modelViewerContainer {
-        flex: 1;
-        height: auto !important;
-        min-height: 0;
-    }*/

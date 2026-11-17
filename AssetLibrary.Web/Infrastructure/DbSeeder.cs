@@ -1,6 +1,9 @@
-﻿using AssetLibrary.Data;
+﻿
+using AssetLibrary.Data;
 using AssetLibrary.Data.Models;
 using AssetLibrary.Data.Models.Enum;
+using AssetLibrary.Services.Contracts;
+using AssetLibrary.Services.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +11,12 @@ namespace AssetLibrary.Web.Infrastructure;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(IServiceProvider services)
+    public static async Task SeedAsync(IServiceProvider services, string baseUrl)
     {
         var context = services.GetRequiredService<AssetLibraryDbContext>();
         var userManager = services.GetRequiredService<UserManager<User>>();
         var env = services.GetRequiredService<IWebHostEnvironment>();
+        var thumbnailService = services.GetRequiredService<IThumbnailService>();
 
         await context.Database.MigrateAsync();
 
@@ -61,19 +65,22 @@ public static class DbSeeder
         context.Projects.Add(project);
         await context.SaveChangesAsync();
 
-        string root = env.WebRootPath;
-
-
         var seedDir = Path.Combine(env.ContentRootPath, "SeedData", "Models");
         var uploadsDir = Path.Combine(env.WebRootPath, "uploads", "assets");
+
         Directory.CreateDirectory(uploadsDir);
 
         var material = await context.Materials.ToListAsync();
+
+        if (material.Count == 0)
+        {
+            throw new InvalidOperationException("No materials are available for seeding.");
+        }
+
         int number = 0;
 
         foreach (var file in Directory.GetFiles(seedDir))
         {
-
             var extension = Path.GetExtension(file).ToLowerInvariant();
 
             if (extension is not (".stl" or ".obj" or ".fbx"))
@@ -102,6 +109,7 @@ public static class DbSeeder
 
             var assetDir = Path.Combine(uploadsDir, asset.AssetId.ToString());
             Directory.CreateDirectory(assetDir);
+
             File.Copy(file, Path.Combine(assetDir, storedName));
 
             var revision = new Revision
@@ -122,7 +130,67 @@ public static class DbSeeder
 
             asset.CurrentRevisionId = revision.RevisionId;
             await context.SaveChangesAsync();
+
+            try
+            {
+                string rendererUrl = $"{baseUrl.TrimEnd('/')}/dist/thumbnail-renderer.html";
+                string modelUrl = $"{baseUrl.TrimEnd('/')}{revision.FilePath}";
+
+                byte[] thumbnailBytes = await thumbnailService.GenerateAssetThumbnailAsync(rendererUrl, modelUrl);
+
+                using var thumbnailStream = new MemoryStream(thumbnailBytes);
+
+                var thumbnail = new ThumbnailUpload
+                {
+                    Content = thumbnailStream,
+                    FileName = "thumbnail.png",
+                    Length = thumbnailBytes.Length
+                };
+
+                await thumbnailService.SaveAssetThumbnailAsync(revision.RevisionId, thumbnail);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"Thumbnail generation failed for {file}: {ex.Message}");
+            }
         }
 
+        try
+        {
+            string rendererUrl = $"{baseUrl.TrimEnd('/')}/dist/thumbnail-renderer.html";
+
+            var modelUrls = await context.Assets
+                .Where(a => a.ProjectId == project.ProjectId)
+                .Select(a => a.CurrentRevision!.FilePath)
+                .ToListAsync();
+
+            if (modelUrls.Count > 0)
+            {
+                var absoluteModelUrls = modelUrls
+                    .Select(path => $"{baseUrl.TrimEnd('/')}{path}")
+                    .ToList();
+
+                byte[] thumbnailBytes = await thumbnailService.GenerateProjectThumbnailAsync(rendererUrl, absoluteModelUrls);
+
+                using var thumbnailStream = new MemoryStream(thumbnailBytes);
+
+                var thumbnail = new ThumbnailUpload
+                {
+                    Content = thumbnailStream,
+                    FileName = "project-thumbnail.png",
+                    Length = thumbnailBytes.Length
+                };
+
+                await thumbnailService.SaveProjectThumbnailAsync(project.ProjectId, thumbnail);
+
+                project.ThumbnailGeneratedOn = DateTime.UtcNow;
+                await context.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Project thumbnail generation failed: {ex.Message}");
+        }
     }
 }

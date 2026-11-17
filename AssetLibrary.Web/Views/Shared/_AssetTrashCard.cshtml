@@ -1,0 +1,77 @@
+﻿@model AssetCardViewModel
+
+<div class="asset-card position-relative">
+
+    <div class="asset-card-top">
+        <span class="asset-part-no">@Model.PartNumber</span>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="status-pill status-@Model.Status.ToString().ToLower()">
+                @Model.Status
+            </span>
+
+            <div class="dropdown position-relative z-2">
+                <button class="dropdown-toggle-btn"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        title="Options">
+                    &#8285;
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <button type="button"
+                                class="dropdown-item"
+                                data-action="inspect-model"
+                                data-asset-id="@Model.AssetId"
+                                data-asset-name="@Model.AssetName">
+                            <i class="bi bi-box me-2"></i>
+                            3D Inspect
+                        </button>
+                    </li>
+
+                    <li><hr class="dropdown-divider my-1"></li>
+
+                    <li>
+                        <form asp-controller="Trash" asp-action="DeleteAssetPermanently" asp-route-id="@Model.AssetId" method="post" onsubmit="return confirm('Permanently delete this asset? This cannot be undone.');">
+
+                            <button type="submit" class="dropdown-item text-danger">
+                                Delete permanently
+                            </button>
+
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="asset-thumbnail">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailPath))
+        {
+            <img src="@Model.ThumbnailPath"
+                 alt="@Model.AssetName thumbnail"
+                 loading="lazy" />
+        }
+        else
+        {
+            <div class="asset-thumbnail-placeholder">
+                <i class="bi bi-box"></i>
+            </div>
+        }
+    </div>
+
+    <p class="asset-name">
+        @Model.AssetName
+    </p>
+
+    <span class="asset-material">
+        @(Model.MaterialName ?? "No material set")
+    </span>
+
+    <div class="asset-foot">
+        <span>Revisions: @(Model.CurrentRevisionNumber?.ToString() ?? "—")</span>
+    </div>
+
+</div>

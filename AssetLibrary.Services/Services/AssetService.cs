@@ -13,14 +13,15 @@
     public class AssetService : IAssetService
     {
         private readonly AssetLibraryDbContext dbContext;
-
-        private readonly ILogger<AssetService> logger;
         private readonly IFileStorageService fileStorageService;
-        public AssetService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService, ILogger<AssetService> logger)
+        private readonly IThumbnailService thumbnailService;
+        private readonly ILogger<AssetService> logger;
+        public AssetService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService, IThumbnailService thumbnailService, ILogger<AssetService> logger)
         {
             this.dbContext = dbContext;
             this.logger = logger;
             this.fileStorageService = fileStorageService;
+            this.thumbnailService = thumbnailService;
 
         }
         public async Task<Asset?> GetAssetDetailsAsync(int assetId)
@@ -192,30 +193,7 @@
                 ChangeNotes = model.ChangeNotes
             };
 
-            string? thumbnailPath = null;
-
             dbContext.Revisions.Add(revision);
-
-            if (thumbnail != null)
-            {
-                try
-                {
-                    if (await fileStorageService.IsValidThumbnailAsync(thumbnail))
-                    {
-                        thumbnail.Content.Position = 0;
-
-                        thumbnailPath = await fileStorageService.SaveAsync(thumbnail.Content, thumbnail.FileName, $"assets/{asset.AssetId}");
-
-                        revision.ThumbnailPath = thumbnailPath;
-                        revision.ThumbnailGeneratedOn = DateTime.UtcNow;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Thumbnail failure must not interrupt the original revision upload.
-                    logger.LogWarning(ex, "Failed to save thumbnail for revision {RevisionNumber} of asset {AssetId}", revision.RevisionNumber, asset.AssetId);
-                }
-            }
 
             asset.CurrentRevision = revision;
             asset.UpdatedOn = DateTime.UtcNow;
@@ -223,17 +201,17 @@
             try
             {
                 await dbContext.SaveChangesAsync();
+
+                if (thumbnail != null)
+                {
+                    await TrySaveThumbnailAsync(thumbnail, revision);
+                }
+
                 return true;
             }
             catch
             {
                 fileStorageService.DeleteFile(relativePath);
-
-                if (thumbnailPath != null)
-                {
-                    fileStorageService.DeleteFile(thumbnailPath);
-                }
-
                 throw;
             }
         }
@@ -362,34 +340,19 @@
                 return false;
             }
 
-            var oldFilePaths = asset.Revisions.Select(r => r.FilePath).ToList();
-            var oldThumbnailPaths = asset.Revisions.Select(r => r.ThumbnailPath).Where(p => !string.IsNullOrEmpty(p)).ToList();
+            var oldFilePaths = asset.Revisions
+                .Select(r => r.FilePath)
+                .ToList();
+
+            var oldThumbnailPaths = asset.Revisions
+                .Select(r => r.ThumbnailPath)
+                .Where(p => !string.IsNullOrEmpty(p))
+                .ToList();
 
             string newFilePath = await fileStorageService.SaveAsync(model.File, $"assets/{asset.AssetId}");
 
-            string? thumbnailPath = null;
-
             try
             {
-
-                if (thumbnail != null)
-                {
-                    try
-                    {
-                        if (await fileStorageService.IsValidThumbnailAsync(thumbnail))
-                        {
-                            thumbnail.Content.Position = 0;
-                            thumbnailPath = await fileStorageService.SaveAsync(thumbnail.Content, thumbnail.FileName, $"assets/{asset.AssetId}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // Thumbnail failure must not interrupt the original revision upload.
-                        logger.LogWarning(ex, "Failed to save thumbnail for replaced asset {AssetId}", asset.AssetId);
-                    }
-                }
-
-
                 asset.CurrentRevisionId = null;
                 await dbContext.SaveChangesAsync();
 
@@ -405,9 +368,7 @@
                     RevisionNumber = 1,
                     UploadedByUserId = userId,
                     UploadedOn = DateTime.UtcNow,
-                    ChangeNotes = "Initial revision [File Replaced]",
-                    ThumbnailPath = thumbnailPath,
-                    ThumbnailGeneratedOn = thumbnailPath != null ? DateTime.UtcNow : null
+                    ChangeNotes = "Initial revision [File Replaced]"
                 };
 
                 dbContext.Revisions.Add(revision);
@@ -415,16 +376,15 @@
                 asset.UpdatedOn = DateTime.UtcNow;
 
                 await dbContext.SaveChangesAsync();
+
+                if (thumbnail != null)
+                {
+                    await TrySaveThumbnailAsync(thumbnail, revision);
+                }
             }
             catch
             {
                 fileStorageService.DeleteFile(newFilePath);
-
-                if (thumbnailPath != null)
-                {
-                    fileStorageService.DeleteFile(thumbnailPath);
-                }
-
                 throw;
             }
 
@@ -435,7 +395,7 @@
 
             foreach (var oldThumbnailPath in oldThumbnailPaths)
             {
-                fileStorageService.DeleteFile(oldThumbnailPath);
+                thumbnailService.DeleteThumbnail(oldThumbnailPath);
             }
 
             return true;
@@ -475,13 +435,13 @@
 
             foreach (var path in thumbnailPaths)
             {
-                fileStorageService.DeleteFile(path);
+                thumbnailService.DeleteThumbnail(path);
             }
 
             return true;
         }
 
-        // Method
+        // Methods
         private async Task<int> GetNextRevisionNumberAsync(int assetId)
         {
             int? max = await dbContext.Revisions
@@ -489,6 +449,22 @@
                 .MaxAsync(r => (int?)r.RevisionNumber);
 
             return (max ?? 0) + 1;
+        }
+        private async Task TrySaveThumbnailAsync(ThumbnailUpload? thumbnail, Revision revision)
+        {
+            if (thumbnail == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await thumbnailService.SaveAssetThumbnailAsync(revision.RevisionId, thumbnail);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to save thumbnail for revision {RevisionId}", revision.RevisionId);
+            }
         }
     }
 }

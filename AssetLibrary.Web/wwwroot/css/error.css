@@ -1,0 +1,314 @@
+﻿
+/* =========================================================
+   ERROR PAGE - MAIN LAYOUT
+   ========================================================= */
+
+.error-page {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 24px 48px;
+    color: #252525;
+}
+
+.error-breadcrumb {
+    margin-bottom: 28px;
+    color: #8b8177;
+    font-family: monospace;
+    font-size: 14px;
+}
+
+    .error-breadcrumb a {
+        color: #52677e;
+        text-decoration: none;
+    }
+
+        .error-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+
+/* =========================================================
+   ERROR CARD
+   ========================================================= */
+
+.error-card {
+    width: 100%;
+    max-width: 720px;
+    margin: 20px auto;
+    padding: 40px 36px;
+    background: #faf9f6;
+    border: 1px solid #e5ded3;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.error-label {
+    margin-bottom: 10px;
+    color: #a47756;
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.error-card h1 {
+    margin: 0 0 14px;
+    color: #252525;
+    font-size: clamp(26px, 4vw, 36px);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.error-description {
+    max-width: 550px;
+    margin: 0 auto 24px;
+    color: #766e66;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   REQUEST ID
+   ========================================================= */
+
+.error-request {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto 24px;
+    padding: 14px 18px;
+    background: #f1eee8;
+    border: 1px solid #e4ddd1;
+    border-radius: 6px;
+    text-align: left;
+}
+
+.error-request-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #8b8177;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.error-request code {
+    display: block;
+    overflow-wrap: anywhere;
+    color: #52677e;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+   ========================================================= */
+
+.error-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.error-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 24px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: #c85e2a;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+    .error-button:hover {
+        background: #ad4e21;
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .error-button:focus-visible {
+        outline: 3px solid #52677e;
+        outline-offset: 3px;
+    }
+
+.error-button-secondary {
+    background: transparent;
+    border-color: #d8cec0;
+    color: #62594f;
+}
+
+    .error-button-secondary:hover {
+        background: #eee9e1;
+        color: #252525;
+    }
+
+
+/* =========================================================
+   FOOTER NOTE
+   ========================================================= */
+
+.error-footer-note {
+    margin: 24px 0 0;
+    color: #948a80;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+/* =========================================================
+   SHORT SCREENS
+   ========================================================= */
+
+@media (max-height: 800px) {
+    .error-page {
+        padding-top: 20px;
+        padding-bottom: 24px;
+    }
+
+    .error-breadcrumb {
+        margin-bottom: 16px;
+    }
+
+    .error-card {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding: 24px 28px;
+    }
+
+    .error-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 14px;
+        font-size: 26px;
+    }
+
+    .error-label {
+        margin-bottom: 8px;
+    }
+
+    .error-card h1 {
+        margin-bottom: 10px;
+    }
+
+    .error-description {
+        margin-bottom: 18px;
+        line-height: 1.5;
+    }
+
+    .error-request {
+        margin-bottom: 18px;
+        padding: 12px 16px;
+    }
+
+    .error-footer-note {
+        margin-top: 18px;
+    }
+}
+
+
+/* =========================================================
+   SMALL SCREENS
+   ========================================================= */
+
+@media (max-width: 580px) {
+    .error-page {
+        padding: 24px 16px 32px;
+    }
+
+    .error-breadcrumb {
+        margin-bottom: 20px;
+    }
+
+    .error-card {
+        margin: 12px auto;
+        padding: 28px 18px;
+    }
+
+    .error-description {
+        font-size: 15px;
+    }
+
+    .error-actions {
+        flex-direction: column;
+    }
+
+    .error-button {
+        width: 100%;
+    }
+}
+
+
+/* =========================================================
+   VERY SHORT AND SMALL SCREENS
+   ========================================================= */
+
+@media (max-height: 600px) {
+    .error-page {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .error-breadcrumb {
+        margin-bottom: 10px;
+    }
+
+    .error-card {
+        margin-top: 6px;
+        margin-bottom: 6px;
+        padding: 18px 20px;
+    }
+
+    .error-icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 10px;
+        font-size: 22px;
+    }
+
+    .error-description {
+        margin-bottom: 14px;
+    }
+
+    .error-request {
+        margin-bottom: 14px;
+        padding: 10px 14px;
+    }
+
+    .error-footer-note {
+        margin-top: 14px;
+    }
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .error-button {
+        transition: none;
+    }
+}

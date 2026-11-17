@@ -39,6 +39,12 @@
         [StringLength(ProjectDescriptionMaxLength)]
         public string? Description { get; set; }
 
-        public ICollection<Asset> Assets = new List<Asset>();
+        [Column(TypeName = "DATETIME2(3)")]
+        public DateTime? ThumbnailGeneratedOn { get; set; }
+
+        [StringLength(ProjectThumbnailPathMaxLength)]
+        public string? ThumbnailPath { get; set; }
+
+        public ICollection<Asset> Assets { get; set; } = new List<Asset>();
     }
 }

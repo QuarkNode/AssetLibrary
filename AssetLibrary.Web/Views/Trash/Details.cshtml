@@ -75,7 +75,7 @@
         <div class="asset-grid">
             @foreach (var asset in assets)
             {
-                <div class="asset-card" style="cursor: default;">
+                @* <div class="asset-card" style="cursor: default;">
                     <div class="asset-card-top">
                         <span class="asset-part-no">@(asset.PartNumber ?? "—")</span>
                         <span class="status-pill status-@asset.Status.ToString().ToLower()">@asset.Status</span>
@@ -89,7 +89,9 @@
                     <div class="asset-foot">
                         <span>Revisions: @asset.RevisionCount</span>
                     </div>
-                </div>
+                </div> *@
+
+                <partial name="_AssetTrashCard" model="asset" />
             }
         </div>
     }

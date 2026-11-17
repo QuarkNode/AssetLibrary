@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "Deleted Projects";
-    const int retentionDays = 30; // keep in sync with your purge job
+    const int retentionDays = 30; // Placeholder for retention period. Will be a future configuration value.
     var projects = Model ?? new List<DeletedProjectViewModel>();
 }
 
@@ -43,7 +43,7 @@
                             <div class="thumb-media">
                                 @if (!string.IsNullOrEmpty(project.ThumbnailUrl))
                                 {
-                                    <img src="@project.ThumbnailUrl" alt="@project.ProjectName" style="opacity: .6;" />
+                                    <img src="@project.ThumbnailUrl" alt="@project.ProjectName" />
                                 }
                                 else
                                 {
@@ -87,5 +87,5 @@
 </div>
 
 @section Styles {
-    <link rel="stylesheet" href="~/css/trash.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/trash-index.css" asp-append-version="true" />
 }

@@ -10,10 +10,12 @@
     {
         private readonly AssetLibraryDbContext dbContext;
         private readonly IFileStorageService fileStorageService;
-        public TrashService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService)
+        private readonly IThumbnailService thumbnailService;
+        public TrashService(AssetLibraryDbContext dbContext, IFileStorageService fileStorageService, IThumbnailService thumbnailService)
         {
             this.dbContext = dbContext;
             this.fileStorageService = fileStorageService;
+            this.thumbnailService = thumbnailService;
         }
         public async Task<DeletedProjectDetailsViewModel?> GetDeletedProjectDetailsAsync(int projectId)
         {
@@ -27,7 +29,6 @@
                 .Include(p => p.Assets)
                     .ThenInclude(a => a.CurrentRevision)
                 .FirstOrDefaultAsync(p => p.ProjectId == projectId && p.IsDeleted);
-
             if (project == null)
             {
                 return null;
@@ -43,6 +44,7 @@
                 Status = project.Status,
                 CreatedOn = project.CreatedOn,
                 DeletedOn = project.DeletedOn,
+                ThumbnailPath = project.ThumbnailPath,
                 Assets = project.Assets.Select(a => new AssetCardViewModel
                 {
                     AssetId = a.AssetId,
@@ -52,7 +54,8 @@
                     CurrentRevisionNumber = a.CurrentRevision.RevisionNumber,
                     RevisionCount = a.Revisions?.Count ?? 0,
                     PartNumber = a.PartNumber,
-                    MaterialName = a.Material?.MaterialName
+                    MaterialName = a.Material?.MaterialName,
+                    ThumbnailPath = a.CurrentRevision.ThumbnailPath
                 })
                 .ToList()
             };
@@ -69,7 +72,7 @@
                 {
                     ProjectId = p.ProjectId,
                     ProjectName = p.ProjectName,
-                    ThumbnailUrl = null,
+                    ThumbnailUrl = p.ThumbnailPath,
                     AssetCount = p.Assets.Count
                 })
                 .ToListAsync();
@@ -118,16 +121,18 @@
             var assets = project.Assets;
             var revisions = assets.SelectMany(a => a.Revisions).ToList();
 
-            var filePaths = assets
+            var assetFilePaths = assets
                 .SelectMany(a => a.Revisions)
                 .Select(r => r.FilePath)
                 .ToList();
 
-            var thumbnailPaths = assets
+            var assetThumbnailPaths = assets
                 .SelectMany(a => a.Revisions)
                 .Where(r => !string.IsNullOrEmpty(r.ThumbnailPath))
                 .Select(r => r.ThumbnailPath)
                 .ToList();
+
+            var projectThumbnailPath = project.ThumbnailPath;
 
             foreach (var asset in assets)
             {
@@ -147,14 +152,19 @@
 
             await dbContext.SaveChangesAsync();
 
-            foreach (var filePath in filePaths)
+            foreach (var filePath in assetFilePaths)
             {
                 fileStorageService.DeleteFile(filePath);
             }
 
-            foreach (var thumbnailPath in thumbnailPaths)
+            foreach (var assetThumbnailPath in assetThumbnailPaths)
             {
-                fileStorageService.DeleteFile(thumbnailPath);
+                thumbnailService.DeleteThumbnail(assetThumbnailPath);
+            }
+
+            if (!string.IsNullOrWhiteSpace(projectThumbnailPath))
+            {
+                thumbnailService.DeleteThumbnail(projectThumbnailPath);
             }
 
             return true;

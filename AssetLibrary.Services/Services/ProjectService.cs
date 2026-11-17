@@ -18,14 +18,16 @@
     public class ProjectService : IProjectService
     {
         private readonly AssetLibraryDbContext dbContext;
-        private readonly ILogger<ProjectService> logger;
         private readonly IFileStorageService fileStorageService;
+        private readonly IThumbnailService thumbnailService;
+        private readonly ILogger<ProjectService> logger;
 
-        public ProjectService(AssetLibraryDbContext dbContext, ILogger<ProjectService> logger, IFileStorageService fileStorageService)
+        public ProjectService(AssetLibraryDbContext dbContext, ILogger<ProjectService> logger, IFileStorageService fileStorageService, IThumbnailService thumbnailService)
         {
             this.dbContext = dbContext;
             this.logger = logger;
             this.fileStorageService = fileStorageService;
+            this.thumbnailService = thumbnailService;
         }
 
         public async Task<ProjectDetailsViewModel?> GetDetailsAsync(int projectId)
@@ -135,7 +137,7 @@
 
             asset.CurrentRevisionId = revision.RevisionId;
             await dbContext.SaveChangesAsync();
-            await SaveThumbnailAsync(thumbnail, revision, subFolder);
+            await TrySaveThumbnailAsync(thumbnail, revision);
         }
         public async Task<int> ProcessAssetUploadViewModelAsync(UploadAssetViewModel viewModel, ThumbnailUpload? thumbnail, int userId)
         {
@@ -196,7 +198,7 @@
 
             newAsset.CurrentRevisionId = revision.RevisionId;
             await dbContext.SaveChangesAsync();
-            await SaveThumbnailAsync(thumbnail, revision, subFolder);
+            await TrySaveThumbnailAsync(thumbnail, revision);
 
             return newAsset.ProjectId;
         }
@@ -280,7 +282,7 @@
         }
 
         // Methods
-        private async Task SaveThumbnailAsync(ThumbnailUpload? thumbnail, Revision revision, string subFolder)
+        private async Task TrySaveThumbnailAsync(ThumbnailUpload? thumbnail, Revision revision)
         {
             if (thumbnail == null)
             {
@@ -289,35 +291,14 @@
 
             try
             {
-                bool isValid = await fileStorageService.IsValidThumbnailAsync(thumbnail);
-
-                if (!isValid)
-                {
-                    return;
-                }
-
-                if (thumbnail.Content.CanSeek)
-                {
-                    thumbnail.Content.Position = 0;
-                }
-
-                string thumbnailPath = await fileStorageService.SaveAsync(
-                    thumbnail.Content,
-                    thumbnail.FileName,
-                    subFolder);
-
-                revision.ThumbnailPath = thumbnailPath;
-                revision.ThumbnailGeneratedOn = DateTime.UtcNow;
-
-                await dbContext.SaveChangesAsync();
+                await thumbnailService.SaveAssetThumbnailAsync(revision.RevisionId, thumbnail);
             }
             catch (Exception ex)
             {
-                // Thumbnail failure must not interrupt the original asset upload.
-
-                logger.LogWarning(ex, "Failed to generate thumbnail for revision {RevisionId}", revision.RevisionId);
+                logger.LogWarning(ex, "Failed to save thumbnail for revision {RevisionId}", revision.RevisionId);
             }
         }
+
         private static Project CreateNewProject(UploadAssetViewModel viewModel, int userId)
         {
             return new()
@@ -361,5 +342,22 @@
             };
         }
 
+        public async Task<List<string>?> GetProjectModelPathsAsync(int projectId, int userId)
+        {
+            var project = await dbContext.Projects
+                .Where(p => p.ProjectId == projectId
+                        && p.OwnerId == userId
+                        && !p.IsDeleted)
+                .Select(p => new
+                {
+                    ModelPaths = p.Assets
+                 .Where(a => !a.IsDeleted && a.CurrentRevision != null)
+                 .Select(a => a.CurrentRevision!.FilePath)
+                 .ToList()
+                })
+         .FirstOrDefaultAsync();
+
+            return project?.ModelPaths;
+        }
     }
 }

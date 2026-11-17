@@ -36,7 +36,8 @@
                 {
                     ProjectId = p.ProjectId,
                     ProjectName = p.ProjectName,
-                    AssetCount = p.Assets.Count(a => !a.IsDeleted)
+                    AssetCount = p.Assets.Count(a => !a.IsDeleted),
+                    ThumbnailUrl = p.ThumbnailPath
                 })
                 .ToListAsync();
 

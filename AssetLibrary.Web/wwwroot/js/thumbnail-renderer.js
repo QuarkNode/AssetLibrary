@@ -275,3 +275,243 @@ export async function generateThumbnail(file, size = 512) {
         }
     }
 }
+
+export async function generateProjectThumbnail(files, size = 512) {
+
+    let renderer = null;
+    let matcapTexture = null;
+
+    const scene = new THREE.Scene();
+    const models = [];
+    const originalMaterials = new Set();
+
+    try {
+
+        // Validate input.
+        if (!Array.isArray(files) || files.length === 0) {
+            throw new Error('At least one model file is required.');
+        }
+
+        if (!Number.isInteger(size) || size < 64 || size > 2048) {
+            throw new Error('Thumbnail size must be between 64 and 2048 pixels.');
+        }
+
+        matcapTexture = createMatcapTexture();
+
+        // Load all models without changing their coordinates.
+        for (const file of files) {
+
+            if (!(file instanceof File)) {
+                throw new Error('Every model must be a valid File.');
+            }
+
+            const extension = file.name
+                .split('.')
+                .pop()
+                .toLowerCase();
+
+            const buffer = await file.arrayBuffer();
+
+            let model = null;
+
+            switch (extension) {
+
+                case 'obj': {
+                    const text = new TextDecoder().decode(buffer);
+                    model = new OBJLoader().parse(text);
+                    break;
+                }
+
+                case 'stl': {
+                    const geometry = new STLLoader().parse(buffer);
+                    geometry.computeVertexNormals();
+
+                    const material = new THREE.MeshStandardMaterial({
+                        color: 0x8da9b8,
+                        metalness: 0.25,
+                        roughness: 0.55
+                    });
+
+                    model = new THREE.Mesh(geometry, material);
+                    break;
+                }
+
+                case 'fbx': {
+                    model = new FBXLoader().parse(buffer, '');
+                    break;
+                }
+
+                default:
+                    throw new Error(`Unsupported 3D model format: .${extension}`);
+            }
+
+            if (!model) {
+                throw new Error(`Could not load model: ${file.name}`);
+            }
+
+            models.push(model);
+            scene.add(model);
+        }
+
+        // Replace materials with the shared Matcap material.
+        for (const model of models) {
+
+            model.traverse(object => {
+
+                if (!object.isMesh) {
+                    return;
+                }
+
+                const oldMaterials = Array.isArray(object.material)
+                    ? object.material
+                    : [object.material];
+
+                oldMaterials.forEach(material => {
+                    if (material) {
+                        originalMaterials.add(material);
+                    }
+                });
+
+                const newMaterials = oldMaterials.map(material => {
+
+                    return new THREE.MeshMatcapMaterial({
+                        matcap: matcapTexture,
+                        color: material?.color
+                            ? material.color.clone()
+                            : 0x8da9b8
+                    });
+
+                });
+
+                object.material = Array.isArray(object.material)
+                    ? newMaterials
+                    : newMaterials[0];
+
+            });
+        }
+
+        // Calculate combined world-space bounds.
+        scene.updateMatrixWorld(true);
+
+        const boundingBox = new THREE.Box3().setFromObject(scene);
+
+        if (boundingBox.isEmpty()) {
+            throw new Error('The project contains no renderable geometry.');
+        }
+
+        const center = boundingBox.getCenter(new THREE.Vector3());
+        const dimensions = boundingBox.getSize(new THREE.Vector3());
+
+        const maxDimension = Math.max(
+            dimensions.x,
+            dimensions.y,
+            dimensions.z
+        );
+
+        if (!Number.isFinite(maxDimension) || maxDimension <= 0) {
+            throw new Error('Invalid project dimensions.');
+        }
+
+        // Calculate camera framing without moving the models.
+        const sphereRadius = dimensions.length() * 0.5;
+        const frustumSize = sphereRadius * 2 * 1.15;
+
+        const camera = new THREE.OrthographicCamera(
+            -frustumSize / 2,
+            frustumSize / 2,
+            frustumSize / 2,
+            -frustumSize / 2,
+            Math.max(maxDimension / 1000, 0.0001),
+            maxDimension * 100
+        );
+
+        const direction = new THREE.Vector3(1, 0.7, 1).normalize();
+        const distance = sphereRadius * 3;
+
+        camera.position.copy(center).add(
+            direction.multiplyScalar(distance)
+        );
+
+        camera.lookAt(center);
+
+        // Create renderer.
+        renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            preserveDrawingBuffer: true
+        });
+
+        renderer.setClearColor(0x000000, 0);
+        renderer.setSize(size, size);
+        renderer.setPixelRatio(1);
+
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+        // Render the complete assembly.
+        renderer.render(scene, camera);
+
+        // Export PNG.
+        const thumbnail = await new Promise((resolve, reject) => {
+
+            renderer.domElement.toBlob(blob => {
+
+                if (!blob) {
+                    reject(new Error('Could not generate project thumbnail.'));
+                    return;
+                }
+
+                resolve(blob);
+
+            }, 'image/png');
+
+        });
+
+        return thumbnail;
+
+    } finally {
+
+        // Release renderer resources.
+        if (renderer) {
+            renderer.dispose();
+        }
+
+        // Dispose geometry and materials.
+        const geometries = new Set();
+        const materials = new Set();
+
+        for (const model of models) {
+
+            model.traverse(object => {
+
+                if (!object.isMesh) {
+                    return;
+                }
+
+                if (object.geometry) {
+                    geometries.add(object.geometry);
+                }
+
+                const objectMaterials = Array.isArray(object.material)
+                    ? object.material
+                    : [object.material];
+
+                objectMaterials.forEach(material => {
+                    if (material) {
+                        materials.add(material);
+                    }
+                });
+
+            });
+        }
+
+        geometries.forEach(geometry => geometry.dispose());
+
+        originalMaterials.forEach(material => material.dispose());
+        materials.forEach(material => material.dispose());
+
+        if (matcapTexture) {
+            matcapTexture.dispose();
+        }
+    }
+}

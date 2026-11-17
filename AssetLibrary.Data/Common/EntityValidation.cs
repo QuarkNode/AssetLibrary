@@ -58,6 +58,8 @@
 
         public const int ProjectDescriptionMaxLength = 200;
 
+        public const int ProjectThumbnailPathMaxLength = 250;
+
         /* Project End */
 
 

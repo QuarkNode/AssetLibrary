@@ -3,6 +3,8 @@ namespace AssetLibrary
     using AssetLibrary.Data;
     using AssetLibrary.Data.Models;
     using AssetLibrary.Extensions;
+    using AssetLibrary.Services.Models;
+    using AssetLibrary.Web.Extensions;
     using AssetLibrary.Web.Infrastructure;
 
     using Microsoft.AspNetCore.Identity;
@@ -42,13 +44,12 @@ namespace AssetLibrary
                 opt.AccessDeniedPath = "/Account/Login";
             });
 
-            WebApplication app = builder.Build();
+            builder.Services.Configure<AppInfoOptions>
+            (
+                builder.Configuration.GetSection(AppInfoOptions.SectionName)
+            );
 
-            // Seeding the Application with pre-existing information to DB for Demo purposes.
-            using (var scope = app.Services.CreateScope())
-            {
-                await DbSeeder.SeedAsync(scope.ServiceProvider);
-            }
+            WebApplication app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -57,6 +58,11 @@ namespace AssetLibrary
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            else
+            {
+                app.UseMigrationsEndPoint();
+                app.UseDeveloperExceptionPage();
+            }
 
             app.UseHttpsRedirection();
             app.UseRouting();
@@ -64,13 +70,24 @@ namespace AssetLibrary
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapStaticAssets();
+            //app.MapStaticAssets();
+            app.UseCustomStaticFiles(); // Custom static files middleware to handle (.obj, .stl, .fbx) file types.
+
+
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+                pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.Run();
+            //app.Run();
+
+            await app.StartAsync();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                await DbSeeder.SeedAsync(scope.ServiceProvider, app.Urls.First());
+            }
+
+            await app.WaitForShutdownAsync();
         }
 
         private static string GetConnectionString(IHostApplicationBuilder builder)

@@ -3,6 +3,9 @@ namespace AssetLibrary.Extensions
 {
     using AssetLibrary.Services.Contracts;
     using AssetLibrary.Services.Services;
+
+    using AssetLibrary.Web.Infrastructure;
+
     public static class ServiceCollectionExtension
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
@@ -13,6 +16,9 @@ namespace AssetLibrary.Extensions
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IHomeService, HomeService>();
             services.AddScoped<ITrashService, TrashService>();
+            services.AddScoped<IThumbnailService, ThumbnailService>();
+
+            services.AddSingleton<IThumbnailRendererService, PlaywrightThumbnailGenerator>();
 
             return services;
         }

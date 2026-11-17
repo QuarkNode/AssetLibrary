@@ -13,17 +13,72 @@
     public class ProjectController : Controller
     {
         private readonly IProjectService projectService;
-        public ProjectController(IProjectService projectService)
+        private readonly IThumbnailService thumbnailService;
+        public ProjectController(IProjectService projectService, IThumbnailService thumbnailService)
         {
             this.projectService = projectService;
+            this.thumbnailService = thumbnailService;
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> GetProjectModelPaths(int id)
+        {
+            var modelPaths = await projectService.GetProjectModelPathsAsync(
+                id,
+                User.GetRequiredUserId());
+
+            if (modelPaths == null)
+            {
+                return NotFound();
+            }
+
+            return Json(modelPaths);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProjectThumbnail(int projectId, IFormFile? thumbnail)
+        {
+            var modelPaths = await projectService.GetProjectModelPathsAsync(
+                projectId,
+                User.GetRequiredUserId());
+
+            if (modelPaths == null)
+            {
+                return NotFound();
+            }
+
+            if (modelPaths.Count == 0)
+            {
+                await thumbnailService.ClearProjectThumbnailAsync(projectId);
+                return Ok();
+            }
+
+            if (thumbnail == null || thumbnail.Length == 0)
+            {
+                return BadRequest("A thumbnail is required.");
+            }
+
+            using var stream = thumbnail.OpenReadStream();
+
+            var upload = new ThumbnailUpload
+            {
+                Content = stream,
+                FileName = thumbnail.FileName,
+                Length = thumbnail.Length
+            };
+
+            await thumbnailService.SaveProjectThumbnailAsync(projectId, upload);
+
+            return Ok();
+        }
 
         // URL: ~/Project/Details/id
         // Returns a view of a Project with its information.
 
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, bool updateThumbnail = false)
         {
             var project = await projectService.GetDetailsAsync(id);
 
@@ -31,6 +86,8 @@
             {
                 return NotFound();
             }
+
+            ViewBag.UpdateThumbnail = updateThumbnail;
 
             return View(project);
         }
@@ -124,7 +181,7 @@
             {
                 int projectId = await projectService.ProcessAssetUploadViewModelAsync(viewModel, thumbnail, User.GetRequiredUserId());
 
-                return RedirectToAction("Details", "Project", new { id = projectId });
+                return RedirectToAction("Details", "Project", new { id = projectId, updateThumbnail = true });
             }
             catch (ProjectLimitExceededException ex)
             {
@@ -197,7 +254,7 @@
                 }
 
                 await projectService.ProcessAssetUploadViewModelAsync(model, thumbnail, User.GetRequiredUserId());
-                return RedirectToAction("Details", "Project", new { id = model.ProjectId });
+                return RedirectToAction("Details", "Project", new { id = model.ProjectId, updateThumbnail = true });
             }
             catch (Exception)
             {

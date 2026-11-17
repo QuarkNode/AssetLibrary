@@ -21,5 +21,6 @@ namespace AssetLibrary.Services.Contracts
         Task<bool> DeleteProjectAsync(int projectId, int userId);
         Task<EditProjectViewModel?> GetEditFormAsync(int projectId, int userId);
         Task<bool> EditAsync(EditProjectViewModel model, int userId);
+        Task<List<string>?> GetProjectModelPathsAsync(int projectId, int userId);
     }
 }

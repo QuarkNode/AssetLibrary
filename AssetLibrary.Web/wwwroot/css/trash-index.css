@@ -1,4 +1,5 @@
-﻿/* ---------- Page wrapper ---------- */
+﻿
+/* ---------- Page wrapper ---------- */
 .home-wrap {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     color: #2A2E33;
@@ -13,7 +14,7 @@
     padding-bottom: 1.25rem;
     margin-bottom: 2rem;
     display: flex;
-    align-items: flex-end;
+    align-items: baseline;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -45,28 +46,29 @@
 .project-card {
     background: #FBF9F4;
     border: 1px solid #E3DFD3;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 0;
     overflow: visible;
     display: flex;
     flex-direction: column;
     position: relative;
     cursor: pointer;
-    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
     .project-card:hover {
         border-color: #C9612D;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(201, 97, 45, 0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 22px rgba(42, 46, 51, 0.10);
     }
 
-/* Thumbnail */
+/* ---------- Project thumbnail ---------- */
 .project-thumb {
     position: relative;
+    overflow: visible;
     aspect-ratio: 16 / 9;
-    border-radius: 7px 7px 0 0;
-    background: linear-gradient(145deg, #F1EDE5 0%, #E8E3D8 100%);
+    border-radius: 11px 11px 0 0;
+    background: linear-gradient(145deg, #F4F1EA, #E8E3D8);
 }
 
 .thumb-media {
@@ -82,25 +84,23 @@
     .thumb-media img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        padding: 0.75rem;
+        transition: transform 0.25s ease;
     }
 
-        .thumb-media img.is-placeholder,
-        .thumb-media svg.is-placeholder {
-            width: 56px;
-            height: 56px;
-            object-fit: contain;
-            color: #5C584D;
-            opacity: .75;
-            transition: opacity .15s ease;
-        }
+    .thumb-media .is-placeholder {
+        width: 95%;
+        height: auto;
+        opacity: 1;
+        filter: contrast(1.4) saturate(1.5);
+    }
 
-.project-card:hover .thumb-media img.is-placeholder,
-.project-card:hover .thumb-media svg.is-placeholder {
+/*.project-card:hover .thumb-media .is-placeholder {
     opacity: 1;
-}
+}*/
 
-/* Card text */
+/* ---------- Card text ---------- */
 .project-card .card-title {
     font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
     font-weight: 600;
@@ -135,3 +135,95 @@
         font-weight: 600;
         text-decoration: none;
     }
+
+/* ---------- Project card 3-dot menu ---------- */
+.project-card .dropdown-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 28px;
+    padding: 0;
+    background: rgba(251, 249, 244, 0.85);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    box-shadow: none;
+    color: #8A8578;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+    .project-card .dropdown-toggle-btn:hover,
+    .project-card .dropdown-toggle-btn:focus-visible,
+    .project-card .dropdown-toggle-btn[aria-expanded="true"] {
+        color: #1C1E21;
+        background-color: #E3DECF;
+        border-color: #C9C2AE;
+    }
+
+    .project-card .dropdown-toggle-btn::after {
+        display: none;
+    }
+
+.project-card .dropdown-menu {
+    min-width: 10rem;
+    cursor: default;
+    background-color: #FFFFFF;
+    border: 1px solid #E3DFD3;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 0.4rem;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    z-index: 1050;
+}
+
+.project-card .dropdown-item {
+    font-size: 0.85rem;
+    color: #2A2E33;
+    padding: 0.4rem 0.85rem;
+    border-radius: 4px;
+}
+
+    .project-card .dropdown-item:hover {
+        background-color: #FBF9F4;
+        color: #C9612D;
+    }
+
+    .project-card .dropdown-item.text-danger:hover {
+        background-color: #FDF2F2;
+        color: #DC3545;
+    }
+
+/* Keep an open menu above neighbouring cards */
+.project-card:has(.dropdown-menu.show) {
+    z-index: 5;
+}
+
+/* ---------- Status pills ---------- */
+.status-pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .7rem;
+    padding: .1rem .5rem;
+    border-radius: 4px;
+    border: 1px solid;
+}
+
+.status-draft {
+    color: #6B6659;
+    background: #EFEBE2;
+    border-color: #D8D4CB;
+}
+
+.status-inreview {
+    color: #8A5A00;
+    background: #FFF4D6;
+    border-color: #EBCF8A;
+}
+
+.status-released {
+    color: #1F6B3A;
+    background: #E4F4EA;
+    border-color: #A9D8B8;
+}
